@@ -5,8 +5,12 @@ import { generateImage } from "./server/generateImage";
 export default async function Home() {
   return (
     <main>
-      <h1>Lucy</h1>
-      <Action action={getAiResponse} args={["hello"]} />
+      <Action
+        action={getAiResponse}
+        args={["hello"]}
+        title="getAiResponse"
+        renderOutput
+      />
     </main>
   );
 }
