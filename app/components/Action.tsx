@@ -15,6 +15,7 @@ export type ActionProps<T, Args extends unknown[]> = {
     optimisticFn?: (...args: Args) => T;
   };
   children?: React.ReactNode;
+  result?: React.ComponentType<ReturnType<typeof useForm<T, Args>>>;
 };
 
 // Action: Pluggable client component for async form submission
@@ -27,8 +28,10 @@ export function Action<T, Args extends unknown[]>({
   args,
   config,
   children,
+  result,
 }: ActionProps<T, Args>) {
-  const { loading, error, submit } = useForm<T, Args>(action, { args, config });
+  const formState = useForm<T, Args>(action, { args, config });
+  const { loading, error, submit } = formState;
 
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,6 +45,7 @@ export function Action<T, Args extends unknown[]>({
       {/* Show loading or error state */}
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: "red" }}>{error.message}</div>}
+      {result && React.createElement(result, formState)}
     </form>
   );
 }
