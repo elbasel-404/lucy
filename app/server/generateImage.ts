@@ -1,20 +1,27 @@
 "use server";
 
 import { GoogleGenAI } from "@google/genai";
+import { log } from "../utils/log";
 import mime from "mime";
 import { writeFile } from "fs";
 
 function saveBinaryFile(fileName: string, content: Buffer) {
   writeFile(fileName, content, "utf8", (err) => {
     if (err) {
-      console.error(`Error writing file ${fileName}:`, err);
+      log({
+        message: `Error writing file ${fileName}`,
+        extra: { error: err },
+      });
       return;
     }
-    console.log(`File ${fileName} saved to file system.`);
+    log({
+      message: `File ${fileName} saved to file system.`,
+    });
   });
 }
 
 export async function generateImage(input: string) {
+  log({ message: "generateImage called", extra: { input } });
   const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
   });

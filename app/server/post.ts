@@ -1,5 +1,6 @@
 "use server";
 import { fetchWithCache } from "./action";
+import { log } from "../utils/log";
 import { normalizeUrl } from "../server/http/normalizeUrl";
 import { fileExists } from "../server/io/fileExists";
 import { readJson } from "../server/io/readJson";
@@ -36,11 +37,18 @@ export async function post<T = any>({
       if (typeModule && typeModule.default) {
         const validation = typeModule.default.safeParse(cached);
         if (!validation.success) {
+          log({
+            url,
+            status: "validation-error",
+            message: "Cached response failed validation",
+          });
           return { error: "Cached response failed validation" };
         }
+        log({ url, status: 200, message: "Cache hit and validated" });
         return { data: cached };
       }
     }
+    log({ url, status: 200, message: "Cache hit" });
     return { data: cached };
   }
 

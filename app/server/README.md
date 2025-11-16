@@ -11,6 +11,7 @@ This folder contains server-side logic and API handlers for the application.
 - **validate.ts**: Contains validation logic for server-side data.
 
 ### Subfolders
+
 - **ai/**: Contains AI-related server logic.
   - **getAiExplanation.ts**: Generates explanations using AI models.
   - **getAiResponse.ts**: Handles AI responses.
@@ -24,6 +25,7 @@ This folder contains server-side logic and API handlers for the application.
   - **readJson.ts**: Reads and parses JSON files.
 
 ## Patterns
+
 - Modular server-side logic.
 - API route handlers and utilities.
 - Separation of concerns by feature (AI, HTTP, IO).
