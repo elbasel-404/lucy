@@ -28,9 +28,10 @@ export type RetrievedFile = {
  */
 export async function retrieveSavedInfo(
   query: string,
-  options?: { minScore?: number; maxFiles?: number }
+  options?: { minScore?: number; maxFiles?: number },
+  logId?: string
 ): Promise<RetrievedFile[]> {
-  log({ message: "retrieveSavedInfo called", extra: { query, options } });
+  log({ message: "retrieveSavedInfo called", extra: { query, options, logId } });
 
   const docsFolder = join(process.cwd(), "docs");
   try {
@@ -58,7 +59,7 @@ export async function retrieveSavedInfo(
 
     let aiResponse: string | null = null;
     try {
-      aiResponse = await getAiResponse(prompt);
+      aiResponse = await getAiResponse(prompt, undefined, logId);
     } catch (err) {
       // Log error and attempt a local fallback heuristic (content-based scoring)
       log({
@@ -71,7 +72,10 @@ export async function retrieveSavedInfo(
       });
       return fallback;
     }
-    log({ message: "retrieveSavedInfo: aiResponse", extra: { aiResponse } });
+    log({
+      message: "retrieveSavedInfo: aiResponse",
+      extra: { aiResponse, logId },
+    });
 
     // Try parsing a JSON array response directly.
     const jsonText = extractJsonFromString(aiResponse);

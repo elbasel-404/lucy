@@ -1,7 +1,7 @@
 "use server";
 
 import { saveFile } from "@/app/utils/saveFile";
-import { log } from "console";
+import { log } from "../../utils/log";
 import { dynamicImportType } from "../io/dynamicImportType";
 import { fileExists } from "../io/fileExists";
 import { readJson } from "../io/readJson";
@@ -21,6 +21,7 @@ export async function post<T = any>({
   schema,
   fetchOptions,
 }: PostArgs): Promise<{ data?: T; error?: string }> {
+  log({ message: "post:start", extra: { url, body } });
   const jsonFolder = "app/json";
   const typesFolder = "app/types";
   const normalized = normalizeUrl(url);
@@ -66,6 +67,7 @@ export async function post<T = any>({
     schema,
   });
   if (result.data) {
+    log({ message: "post:success", extra: { url } });
     await saveFile(jsonFolder, jsonFile, result.data);
   }
   return {

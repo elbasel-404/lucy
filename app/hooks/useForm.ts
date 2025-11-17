@@ -28,6 +28,17 @@ type Config<Args extends unknown[], T> = {
 type UseFormOptions<Args extends unknown[], T> = {
   config?: Config<Args, T>;
   args?: Args;
+  /**
+   * Optional logger function injected into the action as the last argument.
+   * Actions may accept a logger function as their last parameter and call it
+   * to report progress back to the UI.
+   */
+  logger?: (
+    level: "info" | "success" | "error" | "debug",
+    message: string
+  ) => void;
+  // Optional log id will be passed as a primitive last arg to server actions
+  logId?: string;
 };
 
 /**
@@ -69,8 +80,12 @@ export function useForm<T, Args extends unknown[]>(
   callback: (...args: Args) => Promise<T>,
   options?: UseFormOptions<Args, T>
 ): UseFormReturn<T, Args> {
-  const { config = {}, args: initialArgs = [] as unknown as Args } =
-    options || {};
+  const {
+    config = {},
+    args: initialArgs = [] as unknown as Args,
+    logger,
+    logId,
+  } = options || {};
   const [args, setArgs] = useState<Args>(initialArgs);
   // Track loading, data, and error state
   const [loading, setLoading] = useState(false);
@@ -98,15 +113,27 @@ export function useForm<T, Args extends unknown[]>(
       setOptimistic(optimisticValue);
       setData(optimisticValue);
     }
+    // Notify logger that we are starting the action
+    if (logger) {
+      logger("info", "Starting action");
+    }
     try {
       // Await server action
-      const result = await callback(...args);
+      // If logger and/or logId are provided, pass them as the last arguments.
+      // We cast to any to avoid TypeScript errors when changing signatures.
+      const result = await (callback as any)(...args, logger, logId);
       setData(result);
       if (config.optimistic) {
         setOptimistic(result);
       }
+      if (logger) {
+        logger("success", "Action finished");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+      const result = await (callback as any)(...args, logId);
+      if (logger) {
+        logger("error", String(err));
+      }
     } finally {
       setLoading(false);
     }

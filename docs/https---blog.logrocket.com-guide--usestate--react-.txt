@@ -1,0 +1,1283 @@
+Advisory boards aren’t only for executives. Join the LogRocket Content Advisory Board today →
+
+Blog
+
+Dev
+
+Product Management
+
+UX Design
+
+Podcast
+
+Product Leadership
+
+Features
+
+Solutions
+
+Solve User-Reported Issues
+
+Surface User Struggle
+
+Optimize Conversion and Adoption
+
+Start Monitoring for Free
+
+Sign In
+
+2024-10-08
+
+3593
+
+#react
+
+Esteban Herrera
+
+395
+
+Table of contents
+
+React class and functional components
+
+What does useState do?
+
+What can useState hold?
+
+Updating objects and arrays in useState
+
+Declaring state in React
+
+Using React Hooks to update the state
+
+Implementing an object as a state variable with useState Hook
+
+How to update state in a nested object in React with Hooks
+
+Managing React state: Multiple variables vs. One state object
+
+Rules for using useState
+
+useState vs. useEffect React Hooks
+
+Understanding the useReducer Hook
+
+Key points to remember about the useState React Hook
+
+Introducing Galileo AI
+
+LogRocket’s Galileo AI watches every session, surfacing impactful user struggle and key behavior patterns.
+
+LEARN MORE
+
+See how LogRocket's Galileo AI surfaces the most severe issues for you
+
+No signup required
+
+Check it out
+
+Editor’s note: This React useState Hook tutorial was last reviewed and updated on 8 October 2024.
+
+In React, the useState Hook allows you to add state to functional components. useState returns an array with two values: the current state and a function to update it.
+
+The Hook takes an initial state value as an argument and returns an updated state value whenever the setter function is called. It can be used like this:
+
+const [state, setState] = useState(initialValue);
+
+Here, the initialValue is the value you want to start with and state is the current state value that can be used in your component. The setState function can be used to update the state, triggering a re-render of your component.
+
+The useState Hook in React is the equivalent of this.state/this.setSate for functional components.
+
+For a visual guide to useState, check out the video tutorial below:
+
+A guide to useState in React
+
+This video is a guide to the useState Hook in React. Introduction – 00:00 Implementing useState – 01:49 How useState works – 5:58 Try LogRocket for free: https://logrocket.com/?yt21 LogRocket is a frontend application monitoring solution that lets you replay problems as if they happened in your own browser.
+
+🚀 Sign up for The Replay newsletter
+
+The Replay  is a weekly newsletter for dev and engineering leaders.
+
+Delivered once a week, it's your curated guide to the most important conversations around frontend dev, emerging AI tools, and the state of modern software.
+
+React class and functional components
+
+In React, there are two types of components:
+
+Class components: ES6 classes that extend the built-in Component and lifecycle methods:
+
+import { Component } from 'react';
+
+class Message extends Component {
+
+constructor(props) {
+
+super(props);
+
+this.state = {
+
+message: ''
+
+};
+
+}
+
+componentDidMount() {
+
+/* ... */
+
+}
+
+render() {
+
+return <div>{this.state.message}</div>;
+
+}
+
+}
+
+N.B., the React team recommends defining components as functions instead of classes. Here’s a migration guide.
+
+Functional components: Functions that accept arguments as the properties of the component and return valid JSX, as shown below:
+
+function Message(props) {
+
+return <div>{props.message}</div>
+
+}
+
+// Or as an arrow function
+
+const Message = (props) =>  <div>{props.message}</div>
+
+As you can see, there are no state or lifecycle methods. However, as of React v16.8, we can use Hooks. React Hooks, which tend to start with “use” are functions that add state variables to functional components and instrument the lifecycle methods of classes.
+
+What does useState do?
+
+useState allows you to add state to function components. Calling React.useState inside a function component generates a single piece of state associated with that component.
+
+Whereas the state in a class is always an object, with Hooks, the state can be any type. Each piece of state holds a single value: an object, an array, a Boolean, or any other type you can imagine.
+
+So, when should you use the useState Hook? It’s beneficial for managing local component state, but for larger projects, additional state management solutions may be necessary.
+
+What can useState hold?
+
+In React, useState can store any type of value, whereas the state in a class component is limited to being an object. This includes primitive data types like string, number, and Boolean, as well as complex data types such as array, object, and function. It can even cover custom data types like class instances.
+
+Basically, anything that can be stored in a JavaScript variable can be stored in a state managed by useState.
+
+Updating objects and arrays in useState
+
+Never directly modify an object or array stored in useState. Instead, you should create a new updated version of the object or array and call setState with the new version:
+
+// Objects
+
+const [state, setState] = useState({ name: 'John', age: 30 });
+
+const updateName = () => {
+
+setState({ ...state, name: 'Jane' });
+
+};
+
+const updateAge = () => {
+
+setState({ ...state, age: state.age + 1 });
+
+};
+
+// Arrays
+
+const [array, setArray] = useState([1, 2, 3, 4, 5]);
+
+const addItem = () => {
+
+setArray([...array, 6]);
+
+};
+
+const removeItem = () => {
+
+setArray(array.slice(0, array.length - 1));
+
+};
+
+Declaring state in React
+
+useState is a named export from react. To use it, you can write React.useState or import it by writing useState:
+
+import React, { useState } from 'react';
+
+The state object can be declared in a class and allows you to declare more than one state variable, as shown below:
+
+import React from 'react';
+
+class Message extends React.Component {
+
+constructor(props) {
+
+super(props);
+
+this.state = {
+
+message: '',
+
+list: [],
+
+};
+
+}
+
+/* ... */
+
+}
+
+However, unlike the state object, the useState Hook allows you to declare only one state variable (of any type) at a time, like this:
+
+import React, { useState } from 'react';
+
+const Message= () => {
+
+const messageState = useState( '' );
+
+const listState = useState( [] );
+
+}
+
+useState takes the initial value of the state variable as an argument, and you can pass it directly, as shown in the previous example. You can also use a function to lazily initialize the variable. This is useful when the initial state is the result of an expensive computation:
+
+const Message= () => {
+
+const messageState = useState( () => expensiveComputation() );
+
+/* ... */
+
+}
+
+The initial value will be assigned only on the initial render. If it’s a function, it will be executed only on the initial render. In subsequent renders (due to a change of state in the component or a parent component), the argument of the useState Hook will be ignored, and the current value will be retrieved.
+
+It is important to note that if you want to update the state based on new properties the component receives, using useState alone won’t work. This is because useState only uses its initial argument the first time — not each time the property changes. Check this out for the correct way to handle this. It’s demonstrated here:
+
+const Message= (props) => {
+
+const messageState = useState( props.message );
+
+/* ... */
+
+}
+
+But useState doesn’t return just a variable, as the previous examples imply. It returns an array, where the first element is the state variable and the second element is a function to update the value of the variable:
+
+const Message= () => {
+
+const messageState = useState( '' );
+
+const message = messageState[0]; // Contains ''
+
+const setMessage = messageState[1]; // It's a function
+
+}
+
+Usually, you’ll use array destructuring to simplify the code shown above like this:
+
+const Message= () => {
+
+const [message, setMessage]= useState( '' );
+
+}
+
+This way, you can use the state variable in the functional component like any other variable:
+
+const Message = () => {
+
+const [message, setMessage] = useState( '' );
+
+return (
+
+<p>
+
+<strong>{message}</strong>
+
+</p>
+
+);
+
+};
+
+But, why does useState return an array? This is because, compared to an object, an array is more flexible and easy to use. If the method returned an object with a fixed set of properties, you wouldn’t be able to assign custom names easily.
+
+Instead, you’d have to do something like this (assuming the properties of the object are state and setState):
+
+// Without using object destructuring
+
+const messageState = useState( '' );
+
+const message = messageState.state;
+
+const setMessage = messageState
+
+// Using object destructuring
+
+const { state: message, setState: setMessage } = useState( '' );
+
+const { state: list, setState: setList } = useState( [] );
+
+Using React Hooks to update the state
+
+The second element returned by useState is a function that takes a new value to update the state variable. Here’s an example that uses a text box to update the state variable on every change:
+
+const Message = () => {
+
+const [message, setMessage] = useState( '' );
+
+return (
+
+<div>
+
+<input
+
+type="text"
+
+value={message}
+
+placeholder="Enter a message"
+
+onChange={e => setMessage(e.target.value)}
+
+/>
+
+<p>
+
+<strong>{message}</strong>
+
+</p>
+
+</div>
+
+);
+
+};
+
+You can try this on Code Sandbox here.
+
+However, this update function doesn’t update the value right away. Instead, it enqueues the update operation. Then, after re-rendering the component, the argument of useState will be ignored, and this function will return the most recent value.
+
+When updating state based on its previous value, you need to pass a function to the setter function that updates the state. This function receives the previous state value as an argument and returns the new state value, as shown below:
+
+const Message = () => {
+
+const [message, setMessage] = useState( '' );
+
+return (
+
+<div>
+
+<input
+
+type="text"
+
+value={message}
+
+placeholder="Enter some letters"
+
+onChange={e => {
+
+const val = e.target.value;
+
+setMessage(prev => prev + val)
+
+} }
+
+/>
+
+<p>
+
+<strong>{message}</strong>
+
+</p>
+
+</div>
+
+);
+
+};
+
+You can try this on Code Sandbox here.
+
+Implementing an object as a state variable with useState Hook
+
+There are two things you need to keep in mind about updates when using objects:
+
+The importance of immutability
+
+The fact that the setter returned by useState doesn’t merge objects like setState() does in class components
+
+Regarding the first point; if you use the same value as the current state to update the state (React uses Object.is() for comparing), React won’t trigger a re-render.
+
+When working with objects, it’s easy to make the following mistake:
+
+const Message = () => {
+
+const [messageObj, setMessage] = useState({ message: '' });
+
+return (
+
+<div>
+
+<input
+
+type="text"
+
+value={messageObj.message}
+
+placeholder="Enter a message"
+
+onChange={e => {
+
+messageObj.message = e.target.value;
+
+setMessage(messageObj); // Doesn't work
+
+}}
+
+/>
+
+<p>
+
+<strong>{messageObj.message}</strong>
+
+</p>
+
+</div>
+
+);
+
+};
+
+Here’s the Code Sandbox.
+
+Instead of creating a new object, the above example mutates the existing state object. To React, that’s the same object. To make it work, we must create a new object, just like we discussed earlier:
+
+onChange={e => {
+
+const newMessageObj = { message: e.target.value };
+
+setMessage(newMessageObj); // Now it works
+
+}}
+
+This leads us to the second important point you need to remember: when you update a state variable, unlike this.setState in a class component, the function returned by useState does not automatically merge update objects — it replaces them.
+
+Following the previous example, if we add another property to the message object (id) as shown below:
+
+const Message = () => {
+
+const [messageObj, setMessage] = useState({ message: '', id: 1 });
+
+return (
+
+<div>
+
+<input
+
+type="text"
+
+value={messageObj.message}
+
+placeholder="Enter a message"
+
+onChange={e => {
+
+const newMessageObj = { message: e.target.value };
+
+setMessage(newMessageObj);
+
+}}
+
+/>
+
+<p>
+
+<strong>{messageObj.id} : {messageObj.message}</strong>
+
+</p>
+
+</div>
+
+);
+
+};
+
+And we only update the message property like in the above example, React will replace the original { message: '', id: 1 } state object with the object used in the onChange event, which only contains the message property:
+
+{ message: 'message entered' } // id property is lost
+
+You can see how the id property is lost here on Code Sandbox.
+
+You can replicate the behavior of setState() by using the function argument that contains the object to be replaced and the object spread syntax:
+
+onChange={e => {
+
+const val = e.target.value;
+
+setMessage(prevState => {
+
+return { ...prevState, message: val }
+
+});
+
+}}
+
+The ...prevState part will get all of the properties of the object, and the message: val part will overwrite the message property. This will have the same result as using Object.assign() (just remember to create a new object):
+
+onChange={e => {
+
+const val = e.target.value;
+
+setMessage(prevState => {
+
+return Object.assign({}, prevState, { message: val });
+
+});
+
+}}
+
+Try it here on Code Sandbox.
+
+However, the spread syntax simplifies this operation, and it also works with arrays. Basically, when applied to an array, the spread syntax removes the brackets so you can create another one with the values of the original array:
+
+[
+
+...['a', 'b', 'c'],
+
+'d'
+
+]
+
+// Is equivalent to
+
+[
+
+'a', 'b', 'c',
+
+'d'
+
+]
+
+Here’s an example that shows how to use useState with arrays:
+
+const MessageList = () => {
+
+const [message, setMessage] = useState("");
+
+const [messageList, setMessageList] = useState([]);
+
+return (
+
+<div>
+
+<input
+
+type="text"
+
+value={message}
+
+placeholder="Enter a message"
+
+onChange={e => {
+
+setMessage(e.target.value);
+
+}}
+
+/>
+
+<input
+
+type="button"
+
+value="Add"
+
+onClick={e => {
+
+setMessageList([
+
+...messageList,
+
+{
+
+// Use the current size as ID (needed to iterate the list later)
+
+id: messageList.length + 1,
+
+message: message
+
+}
+
+]);
+
+setMessage(""); // Clear the text box
+
+}}
+
+/>
+
+<ul>
+
+{messageList.map(m => (
+
+<li key={m.id}>{m.message}</li>
+
+))}
+
+</ul>
+
+</div>
+
+);
+
+};
+
+You have to be careful when applying the spread syntax to multi-dimensional arrays because it only performs a shallow copy, meaning nested arrays won’t be fully copied and will still reference the original data.
+
+Over 200k developers use LogRocket to create better digital experiences
+
+Learn more →
+
+How to update state in a nested object in React with Hooks
+
+In JavaScript, multi-dimensional arrays are arrays within arrays, as shown below:
+
+[
+
+['value1','value2'],
+
+['value3','value4']
+
+]
+
+You could use them to group all your state variables in one place. However, for that purpose, it would be better to use nested objects like this:
+
+{
+
+'row1' : {
+
+'key1' : 'value1',
+
+'key2' : 'value2'
+
+},
+
+'row2' : {
+
+'key3' : 'value3',
+
+'key4' : 'value4'
+
+}
+
+}
+
+But, the problem when working with multi-dimensional arrays and nested objects is that Object.assign and the spread syntax will create a shallow copy instead of a deep copy.
+
+From the spread syntax documentation:
+
+Spread syntax effectively goes one level deep while copying an array. Therefore, it may be unsuitable for copying multi-dimensional arrays, as the following example shows. (The same is true with Object.assign() and the spread syntax.)
+
+let a = [[1], [2], [3]];
+
+let b = [...a];
+
+b.shift().shift(); //  1
+
+//  Array 'a' is affected as well: [[], [2], [3]]
+
+This Stack Overflow query offers good explanations for the above example, but the important point is that when using nested objects, we can’t just use the spread syntax to update the state object. For example, consider the following state object:
+
+const [messageObj, setMessage] = useState({
+
+author: '',
+
+message: {
+
+id: 1,
+
+text: ''
+
+}
+
+});
+
+The following code snippets show some incorrect ways to update the text field:
+
+// Wrong
+
+setMessage(prevState => ({
+
+...prevState,
+
+text: 'My message'
+
+}));
+
+// Wrong
+
+setMessage(prevState => ({
+
+...prevState.message,
+
+text: 'My message'
+
+}));
+
+// Wrong
+
+setMessage(prevState => ({
+
+...prevState,
+
+message: {
+
+text: 'My message'
+
+}
+
+}));
+
+To properly update the text field, we need to create a new object that includes all fields and nested objects from the original object:
+
+// Correct
+
+setMessage(prevState => ({
+
+...prevState,           // copy all other field/objects
+
+message: {              // recreate the object that contains the field to update
+
+...prevState.message, // copy all the fields of the object
+
+text: 'My message'    // overwrite the value of the field to update
+
+}
+
+}));
+
+In the same way, here’s how you’d update the author field of the state object:
+
+// Correct
+
+setMessage(prevState => ({
+
+author: 'Joe',          // overwrite the value of the field to update
+
+...prevState.message    // copy all other field/objects
+
+}));
+
+However, this is assuming the message object doesn’t change. If it does change, you’d have to update the object this way:
+
+// Correct
+
+setMessage(prevState => ({
+
+author: 'Joe',          // update the value of the field
+
+message: {              // recreate the object that contains the field to update
+
+...prevState.message, // copy all the fields of the object
+
+text: 'My message'    // overwrite the value of the field to update
+
+}
+
+}));
+
+Managing React state: Multiple variables vs. One state object
+
+When working with multiple fields or values as the state of your application, you have the option of organizing the state using multiple state variables:
+
+const [id, setId] = useState(-1);
+
+const [message, setMessage] = useState('');
+
+const [author, setAuthor] = useState('');
+
+Or an object state variable:
+
+const [messageObj, setMessage] = useState({
+
+id: 1,
+
+message: '',
+
+author: ''
+
+});
+
+However, you have to be careful when using state objects with a complex structure (nested objects). Consider this example:
+
+const [messageObj, setMessage] = useState({
+
+input: {
+
+author: {
+
+id: -1,
+
+author: {
+
+fName:'',
+
+lName: ''
+
+}
+
+},
+
+message: {
+
+id: -1,
+
+text: '',
+
+date: now()
+
+}
+
+}
+
+});
+
+If you have to update a specific field nested deep in the object, you’ll have to copy all the other objects along with the key-value pairs of the object that contains that specific field:
+
+setMessage(prevState => ({
+
+input: {
+
+...prevState.input,
+
+message: {
+
+...prevState.input.message,
+
+text: 'My message'
+
+}
+
+}
+
+}));
+
+In some cases, cloning deeply nested objects can be expensive because React may re-render parts of your applications that depend on fields that haven’t even changed.
+
+For this reason, the first thing you need to consider is trying to flatten your state object(s). In particular, the React documentation recommends splitting the state into multiple state variables based on which values tend to change together.
+
+If this is not possible, the recommendation is to use libraries that help you work with immutable objects, such as Immutable.js or Immer.
+
+Rules for using useState
+
+useState abides by the same rules that all React Hooks follow:
+
+Only call hooks at the top level
+
+Only call hooks from React functions
+
+The second rule is easy to follow. Don’t use useState in a class component:
+
+class App extends React.Component {
+
+render() {
+
+const [message, setMessage] = useState( '' );
+
+return (
+
+<p>
+
+<strong>{message}</strong>
+
+</p>
+
+);
+
+}
+
+}
+
+Or regular JavaScript functions (not called inside a functional component):
+
+function getState() {
+
+const messageState = useState( '' );
+
+return messageState;
+
+}
+
+const [message, setMessage] = getState();
+
+const Message = () => {
+
+/* ... */
+
+}
+
+You’ll get an error. The first rule means that even inside functional components, you shouldn’t call useState in loops, conditions, or nested functions because React relies on the order in which useState functions are called to get the correct value for a particular state variable.
+
+In that regard, the most common mistake is to wrap useState calls in a conditional statement (they won’t be executed all the time):
+
+if (condition) { // Sometimes it will be executed, making the order of the useState calls change
+
+const [message, setMessage] = useState( '' );
+
+setMessage( aMessage );
+
+}
+
+const [list, setList] = useState( [] );
+
+setList( [1, 2, 3] );
+
+A functional component can have many calls to useState or other Hooks. Each Hook is stored in a list, and there’s a variable that keeps track of the currently executed Hook.
+
+When useState is executed, the state of the current Hook is read (or initialized during the first render), and then, the variable is changed to point to the next Hook. That’s why it is important to always maintain the Hook calls in the same order. Otherwise, a value belonging to another state variable could be returned.
+
+In general terms, here’s a step-by-step example of how React handles and tracks state changes in functional components when using the useState Hook:
+
+React initializes the list of Hooks and the variable that keeps track of the current Hook
+
+React calls your component for the first time
+
+React finds a call to useState, creates a new Hook object (with the initial state), changes the current Hook variable to point to this object, adds the object to the Hooks list, and returns the array with the initial state and the function to update it
+
+React finds another call to useState and repeats the actions of the previous step, storing a new Hook object and changing the current Hook variable
+
+The component state changes
+
+React sends the state update operation (performed by the function returned by useState) to a queue to be processed
+
+React determines it needs to re-render the component
+
+React resets the current Hook variable and calls your component
+
+React finds a call to useState, but this time, because there’s already a Hook at the first position of the list of Hooks, it just changes the current Hook variable and returns the array with the current state, and the function to update it
+
+React finds another call to useState and because a Hook exists in the second position, once again, it just changes the current Hook variable and returns the array with the current state and the function to update it
+
+If you like to read code, refer to the ReactFiberHooks class to learn how Hooks work under the hood.
+
+useState vs. useEffect React Hooks
+
+useState and useEffect allow you to manage state and side effects in your functional components. However, they serve different purposes and should be used in different ways:
+
+useState
+
+Allows you to add state to your functional component
+
+Returns an array with two values: the current state and a setter function for updating the state
+
+Used for managing state that needs to be updated and re-rendered based on user interactions or other events in the component
+
+useEffect
+
+Used to manage side effects in functional components. A side effect is any operation that impacts the component outside of its render, such as making an API call or setting up a timer
+
+Used to manage side effects that need to run after every render of the component or perform any cleanup when the component unmounts
+
+For example, consider a component that fetches data from an API and displays it in a list:
+
+const [data, setData] = useState([]);
+
+useEffect(() => {
+
+fetch('https://api.example.com/data')
+
+.then(res => res.json())
+
+.then(data => setData(data));
+
+}, []);
+
+return (
+
+<ul>
+
+{data.map(item => (
+
+<li key={item.id}>{item.name}</li>
+
+))}
+
+</ul>
+
+);
+
+In this example, the useEffect Hook is used to make an API call and update the data state whenever the component is rendered. The Hook takes a callback function as an argument, which will be executed after every render of the component. The second argument to useEffect is an array of dependencies, which determines when the effect should run. In this case, the empty array means that the effect will only run once when the component is mounted.
+
+Understanding the useReducer Hook
+
+For advanced use cases, you can use the useReducer Hook as an alternative to useState. This is especially useful when you have complex state logic that uses multiple sub-values or when a state depends on the previous one.
+
+Get set up with LogRocket's modern React error tracking in minutes:
+
+Visit https://logrocket.com/signup/ to get
+
+an app ID
+
+Install LogRocket via npm or script tag. LogRocket.init() must be called client-side, not
+
+server-side
+
+npm
+
+Script tag
+
+$ npm i --save logrocket
+
+// Code:
+
+import LogRocket from 'logrocket';
+
+LogRocket.init('app/id');
+
+// Add to your HTML:
+
+<script src="https://cdn.lr-ingest.com/LogRocket.min.js"></script>
+
+<script>window.LogRocket && window.LogRocket.init('app/id');</script>
+
+(Optional) Install plugins for deeper integrations with your stack:
+
+Redux middleware
+
+NgRx middleware
+
+Vuex plugin
+
+Get started now
+
+Key points to remember about the useState React Hook
+
+The update function doesn’t update the value right away
+
+If you use the previous value to update state, you must pass a function that receives the previous value and returns an updated value, for example, setMessage(previousVal => previousVal + currentVal)
+
+If you use the same value as the current state to update the state, React won’t trigger a re-render
+
+Unlike this.setState in class components, useState doesn’t merge objects when the state is updated; it replaces them
+
+useState follows the same rules that all Hooks do. In particular, pay attention to the order in which these functions are called (there’s an ESLint plugin that will help you enforce these rules)
+
+#react
+
+Recent posts:
+
+Real-time AI in Next.js: How to stream responses with the Vercel AI SDK
+
+Streaming AI responses is one of the easiest ways to improve UX. Here’s how to implement it in a Next.js app using the Vercel AI SDK—typing effect, reasoning, and all.
+
+Elijah Asaolu
+
+Nov 17, 2025 ⋅ 9 min read
+
+How to fix React routing loopholes with the React Router Middleware
+
+Learn how React Router’s Middleware API fixes leaky redirects and redundant data fetching in protected routes.
+
+Ikeh Akinyemi
+
+Nov 13, 2025 ⋅ 3 min read
+
+How I used Mastra to build a prize-winning RAG agent
+
+A developer’s retrospective on creating an AI video transcription agent with Mastra, an open-source TypeScript framework for building AI agents.
+
+Chinwike Maduabuchi
+
+Nov 13, 2025 ⋅ 12 min read
+
+Ensuring frontend data integrity with TanStack DB transactions
+
+Learn how TanStack DB transactions ensure data consistency on the frontend with atomic updates, rollbacks, and optimistic UI in a simple order manager app.
+
+Emmanuel John
+
+Nov 13, 2025 ⋅ 11 min read
+
+View all posts
+
+16 Replies to "<code>useState</code> in React: A complete guide"
+
+Thanks for a great article. By the way, I don’t think this part of the article true.
+
+> If you use the same value as the current state (React uses the Object.is for comparing) to update the state, React won’t trigger a re-render
+
+https://codesandbox.io/embed/react-hooks-playground-cfhle
+
+As you can check in this CodeSandBox, even when I call the state updater with the same value as the current state, it still re-renders the component.
+
+Reply
+
+Hi Alan, you’re right, it’s not completely true. From the documentation:
+
+> If you update a State Hook to the same value as the current state, React will bail out without rendering the children or firing effects. (React uses the Object.is comparison algorithm.)
+
+> Note that React may still need to render that specific component again before bailing out. That shouldn’t be a concern because React won’t unnecessarily go ‘deeper’ into the tree.
+
+So it doesn’t always skip the rendering. I’ll update this part of the article. Thank you so much!
+
+Reply
+
+This is likely a very elementary, basic JS question, but I’m learning.
+
+Why did you pass the anonymous function that returns the result of expensiveComputation into useState… instead of just passing the result of expensiveComputation itself?
+
+In this line:
+
+const messageState = useState( () => expensiveComputation() );
+
+Thank you. Once again I know this isn’t a react question but a JS question. Thank you for the clarification. My newbie skills will thank you!
+
+Reply
+
+the argument is evaluated every time the component is re-rendered. If you pass the result of expensiveComputation directly, it will be recalculated on every render, which can lead to performance issues.
+
+Reply
+
+I can see why a call to useState() shouldn’t be mixed into branching code (ifs, loops etc), because the identity of the state is dictated by the order of useState() calls within the stateless function call.
+
+However, I can’t see why having calls to the setMessage function in branching code below would be a problem (as per your example code quoted below).
+
+That’s because once the setMessage reference has been created, the association between the function and the specific state hook has been established, and any call to setMessage or setList will manipulate the correct value.
+
+In fact I don’t think hooks could work at all if the order of state hook _setting_ calls had to be predictable, so I don’t think there’s anything wrong with the code example.
+
+By contrast if the useState() call was conditionally called (e.g. based on props), then any state established by a later useState call would have an unpredictable identity on the second render.
+
+const [message, setMessage] = useState( ” );
+
+const [list, setList] = useState( [] );
+
+if (condition) {
+
+setMessage( aMessage );  // Sometimes it will be executed, making the order change
+
+}
+
+setList( [1, 2, 3] );
+
+Reply
+
+Hi Cefn. Sorry for the late response, you are right, that was a bad example, I have updated the sample code to place the call to useState inside the if block. Thank you so much!
+
+Reply
+
+Hi SpidaFly, sorry for the late response, and no problem at all answering your question. If we have an expression like this:
+
+let result = expensiveComputation();
+
+It will be evaluated immediately, blocking the execution of the code until the method returns.
+
+On the other hand, something like this:
+
+let result = () => expensiveComputation();
+
+Returns a function that is not executed when the line is evaluated, so the execution of the code is not blocked at that particular time. The function is executed only when you can it ( result() ), if ever. That’s the benefit of laziness (https://en.wikipedia.org/wiki/Lazy_evaluation).
+
+Hope this answers your question!
+
+Reply
+
+Hi
+
+There is a typo in the name of useState function in the following line:
+
+“This article is a guide to the useSate (state) hook, the equivalent of this.state/this.setSate for functional components.|
+
+Reply
+
+Hey Alan,
+
+It seems that the initial statement made in the article is true in v16.8.0 and above. I changed the react version in your CodeSandBox and true enough, React doesn’t seem to trigger a re-render if the value is the same as the current state.
+
+Reply
+
+This article should be the offical documentation of the useState hook.  Well done.
+
+Reply
+
+{
+
+const val = e.target.value;
+
+setMessage(prev => prev + val)
+
+} }
+
+/>
+
+In this, I do not seem to understand how “prev” refers to the ACTUAL PREVIOUS value of input ??
+
+Reply
+
+Thanks for the great article!
+
+I have a question about the ‘here’s how you’d update the author field of the state object’ section.
+
+Should this not be
+
+setMessageObj((prevState) => ({
+
+…prevState, // copy all other field/objects
+
+author: “Joe” // overwrite the value of the field to update
+
+}))
+
+As far as I understant, if the message child object has not changed, we can use the spread operator to copy all values as-is, then we just overwrite the author field on the top level of the state object.
+
+Reply
+
+Very helpful article. thank you very much👍🏽
+
+Reply
+
+Thanks for the extremely helpful article!
+
+“If you use the previous value to update state, you must pass a function that receives the previous value and returns the new value”
+
+Not really, in the example given, setMessage(message + val) will work. But because message will only change after next rerender, if you call setMessage(message + val) multiple times, only one will work, and in that case you need the callback to do the trick
+
+Reply
+
+As far as I understant, if the message child object has not changed, we can use the spread operator to copy all values as-is, then we just overwrite the author field on the top level of the state object.
+
+Reply
+
+I’m not sure if I agree with this statement:
+
+“The initial value will be assigned only on the initial render. If it’s a function, it will be executed only on the initial render. In subsequent renders (due to a change of state in the component or a parent component), the argument of the useState Hook will be ignored, and the current value will be retrieved.”
+
+I’m currently working on a project where I’ve submitted the following changes because the dropdown value wasn’t updating after selection of a new value:
+
+https://github.com/MorpheusAIs/Lite-Client/pull/66/files
+
+After applying this change and testing out he new code the dropdown value now changes after selecting a different value from it. So it seems like the variable selectedNetwork is automatically updated when the chainId changes without having to run a useEffect function or even a setSelectedNetwork function anywhere.
+
+Reply
+
+Leave a ReplyCancel reply
+
+Would you be interested in joining LogRocket's developer community?
+
+Yea
+
+No Thanks
+
+Join LogRocket’s Content Advisory Board. You’ll help inform the type of
+
+content we create and get access to exclusive meetups, social accreditation,
+
+and swag.
+
+Sign up now

@@ -21,8 +21,15 @@ export async function gatherInfo(
     maxDocsToDownload?: number;
     // force re-download even if docs exist
     force?: boolean;
+  },
+  logId?: string
+): Promise<any> {
+  // allow passing an optional `logId` as the final argument from `useForm`
+  const prevLogId = (globalThis as any).__CURRENT_LOG_ID__;
+  const maybeLogId: string | undefined = logId;
+  if (maybeLogId && typeof maybeLogId === "string") {
+    (globalThis as any).__CURRENT_LOG_ID__ = maybeLogId;
   }
-) {
   log({ message: "gatherInfo:start", extra: { prompt, options } });
 
   if (!prompt || typeof prompt !== "string") {
@@ -39,8 +46,38 @@ export async function gatherInfo(
     });
 
     // Limit the number of urls we try to download
-    const maxSearch = options?.maxSearchResults ?? 6;
-    const maxDownload = options?.maxDocsToDownload ?? 3;
+    // Guard against passing client references (Next.js will throw if the
+    // caller passes a temporary client reference instead of a primitive value
+    // like `number`). If a client accidentally passes a proxy/temporary
+    // reference we return an explicit error, otherwise we use defaults.
+    let maxSearch = 6;
+    let maxDownload = 6;
+    try {
+      // Prefer direct numbers for these values. Common callers should pass
+      // plain values: `gatherInfo(prompt, { maxSearchResults: 6 })`.
+      if (options && typeof options === "object") {
+        // Accessing properties on a temporary client reference will throw -
+        // the try/catch stops the error from bubbling and lets us return a
+        // friendly message.
+        if (typeof (options as any).maxSearchResults === "number") {
+          maxSearch = (options as any).maxSearchResults;
+        }
+        if (typeof (options as any).maxDocsToDownload === "number") {
+          maxDownload = (options as any).maxDocsToDownload;
+        }
+      }
+    } catch (err) {
+      // This error indicates the caller passed a client reference instead of
+      // a serializable plain value. Provide helpful guidance to the caller
+      // instead of crashing the entire flow.
+      const message =
+        "Cannot access maxSearchResults on the server. You cannot dot into a temporary client reference from a server component. You can only pass the value through to the client. Pass a plain number instead (e.g. gatherInfo(prompt, { maxSearchResults: Number(value) })).";
+      log({
+        message: "gatherInfo:invalidOptions",
+        extra: { error: String(err) },
+      });
+      return { error: message };
+    }
 
     // Extract distinct http(s) urls
     const urls = Array.from(
@@ -67,7 +104,19 @@ export async function gatherInfo(
       const normalized = normalizeUrl(url);
       const safe = normalized.replace(/[^a-zA-Z0-9_.-]/g, "-");
       const expectedFilename = `${safe}.md`;
-      if (!options?.force && (await fileExists("docs", expectedFilename))) {
+      let forceDownload = false;
+      try {
+        if (
+          options &&
+          typeof options === "object" &&
+          typeof (options as any).force === "boolean"
+        ) {
+          forceDownload = (options as any).force;
+        }
+      } catch {
+        forceDownload = false;
+      }
+      if (!forceDownload && (await fileExists("docs", expectedFilename))) {
         // File already exists: skip re-downloading and just return path
         const path = `docs/${expectedFilename}`;
         downloads.push({ url, path, skipped: true });
@@ -94,7 +143,11 @@ export async function gatherInfo(
     // newly-scraped documents are included in the ranking. We also then
     // prioritize any fresh downloads so they can be read and included in the
     // final AI prompt.
-    const retrieved = await retrieveSavedInfo(prompt, { maxFiles: 8 });
+    const retrieved = await retrieveSavedInfo(
+      prompt,
+      { maxFiles: 8 },
+      maybeLogId
+    );
 
     log({
       message: "gatherInfo:retrievalCompleted",
@@ -127,7 +180,7 @@ export async function gatherInfo(
     }
 
     // 4. Read top content (for more context to the AI): read up to 3 top documents
-    const topFiles = retrieved.slice(0, 3);
+    const topFiles = retrieved.slice(0, 6);
     const docsFolder = join(process.cwd(), "docs");
     const filesWithContent: Array<{
       filename: string;
@@ -176,7 +229,7 @@ Downloaded URLs (top results):\n${downloads
     );
 
     const fullPrompt = promptParts.join("\n---\n");
-    const aiAnswer = await getAiResponse(fullPrompt);
+    const aiAnswer = await getAiResponse(fullPrompt, undefined, maybeLogId);
 
     const output = {
       query: prompt,
@@ -191,10 +244,13 @@ Downloaded URLs (top results):\n${downloads
       extra: { query: prompt, count: downloads.length },
     });
 
+    (globalThis as any).__CURRENT_LOG_ID__ = prevLogId;
+
     return output;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     log({ message: "gatherInfo:error", extra: { error: message } });
+    (globalThis as any).__CURRENT_LOG_ID__ = prevLogId;
     return { error: message };
   }
 }

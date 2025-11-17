@@ -1,0 +1,303 @@
+React TutorialReact ExerciseReact Basic ConceptsReact ComponentsReact PropsReact HooksReact RouterReact AdvancedReact ExamplesReact Interview QuestionsReact ProjectsNext.js TutorialReact BootstrapReact Material UIReact Ant DesignReact DesktopReact RebassReact BlueprintJavaScriptWeb Technology
+
+Sign In
+
+▲
+
+Open In App
+
+State Management with useState Hook in React
+
+Last Updated :
+
+23 Jul, 2025
+
+Comments
+
+Improve
+
+Suggest changes
+
+1 Likes
+
+Like
+
+Report
+
+useState is a built-in hook that empowers functional components to manage state directly, eliminating the need for class-based components or external state management libraries for simple use cases. It provides an easy mechanism to track dynamic data within a component, enabling it to React to user interactions and other events by re-rendering the UI when the state changes. In this article, you will learn about State Management with useState in react.Prerequisites:React JSNPM & NodeJSReactJS HooksBenefits of using useState:Simplicity: Makes state management intuitive and easy to understand.Readability: Promotes cleaner code, especially for simple state scenarios.Performance: Lightweight due to being part of the core React library.Integration: Works seamlessly with other React hooks and features.When to use useState:Managing simple, local state within a single component.State that doesn't need to be shared across multiple components.Creating interactive UI elements that respond to user actions.If your application's state becomes more complex or needs to be shared across multiple components, consider using a state management library like Redux or Context API.Approach to Manage State with useState Hook:To utilize useState , import it from the react library at the top of your component file:import React, { useState } from 'react';Within your functional component, call useState with the initial state value as an argument. It returns an array containing two elements:The Current state value: Use this in your JSX to display the data dynamically.A State update function: Call this function to modify the state and trigger a re-render of the component.Syntax:const [stateVariable, setStateVariable] = useState(initialState);Steps to Create React application:Step 1: Create a react application using the following command.npx create-react-application my-react-applicationStep 2: Naviate to the root directory of your application using the following command.cd my-react-applicationProject Structure:project structureThe updated dependencies in package.json f:"dependencies": {    "react": "^18.2.0",    "react-dom": "^18.2.0",    "react-scripts": "5.0.1",    "web-vitals": "^2.1.4"}Example 1: Basic Counter with ButtonInitial state: count = 0Click "Increment": count = 1 (UI updates to reflect the new count)Click "Increment" again: count = 2 (UI updates again)
+
+JavaScript
+
+import React, {
+
+useState
+
+} from 'react';
+
+function Counter() {
+
+const [count, setCount] = useState(0);
+
+const handleClick = () => {
+
+setCount(count + 1);
+
+};
+
+return (
+
+<div>
+
+<p>Count: {count}</p>
+
+<button
+
+onClick={handleClick}>
+
+Increment
+
+</button>
+
+</div>
+
+);
+
+}
+
+export default Counter;
+
+Start your application using the following command.npm startOutput: Example 2: Input Field with Value TrackingInitial state: name = '' (input field is empty)Type "react": name = 'react' (input field shows "react")Type "geek for geeks": name = 'geek for geeks' (input field shows "geek for geeks")
+
+JavaScript
+
+import React, {
+
+useState
+
+}
+
+from 'react';
+
+function InputFeild() {
+
+const [name, setName] = useState('');
+
+const handleChange = (event) => {
+
+setName(event.target.value);
+
+}
+
+return (
+
+<div>
+
+<label>Name:</label>
+
+<input type="text"
+
+value={name}
+
+onChange={handleChange} />
+
+<p>Entered name: {name}</p>
+
+</div>
+
+);
+
+}
+
+export default InputFeild;
+
+Output:example 2 output
+
+Create Quiz
+
+Comment
+
+C
+
+chmanikanta528
+
+Follow
+
+1
+
+Improve
+
+C
+
+chmanikanta528
+
+Follow
+
+1
+
+Improve
+
+Article Tags :
+
+Web Technologies
+
+ReactJS
+
+React-Hooks
+
+Explore
+
+React Tutorial
+
+5 min read
+
+React FundamentalsReact Introduction
+
+6 min read
+
+React Environment Setup
+
+3 min read
+
+React JS ReactDOM
+
+2 min read
+
+React JSX
+
+5 min read
+
+ReactJS Rendering Elements
+
+3 min read
+
+React Lists
+
+4 min read
+
+React Forms
+
+4 min read
+
+ReactJS Keys
+
+4 min read
+
+Components in ReactReact Components
+
+4 min read
+
+ReactJS Functional Components
+
+4 min read
+
+React Class Components
+
+3 min read
+
+ReactJS Pure Components
+
+4 min read
+
+ReactJS Container and Presentational Pattern in Components
+
+2 min read
+
+ReactJS PropTypes
+
+5 min read
+
+React Lifecycle
+
+7 min read
+
+React HooksReact Hooks
+
+8 min read
+
+React useState Hook
+
+5 min read
+
+ReactJS useEffect Hook
+
+5 min read
+
+Routing in ReactReact Router
+
+5 min read
+
+React JS Types of Routers
+
+10 min read
+
+Advanced React ConceptsLazy Loading in React and How to Implement it ?
+
+4 min read
+
+ReactJS Higher-Order Components
+
+5 min read
+
+Code Splitting in React
+
+4 min read
+
+React ProjectsCreate ToDo App using ReactJS
+
+3 min read
+
+Create a Quiz App using ReactJS
+
+4 min read
+
+Create a Coin Flipping App using ReactJS
+
+3 min read
+
+How to create a Color-Box App using ReactJS?
+
+4 min read
+
+Dice Rolling App using ReactJS
+
+4 min read
+
+Guess the number with React
+
+3 min read
+
+Like
+
+Improvement
+
+Suggest changes
+
+Suggest Changes
+
+Help us improve. Share your suggestions to enhance the article. Contribute your expertise and make a difference in the GeeksforGeeks portal.
+
+Create Improvement
+
+Enhance the article with your expertise. Contribute to the GeeksforGeeks community and help create better learning resources for all.
+
+Suggest Changes
+
+min 4 words, max Words Limit:1000
+
+Thank You!
+
+Your suggestions are valuable to us.
+
+What kind of Experience do you want to share?
+
+Interview Experiences
+
+Admission Experiences
+
+Career Journeys
+
+Work Experiences
+
+Campus Experiences
+
+Competitive Exam Experiences

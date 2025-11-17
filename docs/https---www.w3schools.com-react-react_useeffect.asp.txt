@@ -1,0 +1,647 @@
+Menu
+
+Search field
+
+×
+
+See More
+
+Sign In
+
+★
+
++1
+
+Get Certified
+
+Upgrade
+
+For Teachers
+
+Spaces
+
+Get Certified
+
+Upgrade
+
+For Teachers
+
+Spaces
+
+❮
+
+❯
+
+HTML
+
+CSS
+
+JAVASCRIPT
+
+SQL
+
+PYTHON
+
+JAVA
+
+PHP
+
+HOW TO
+
+W3.CSS
+
+C
+
+C++
+
+C#
+
+BOOTSTRAP
+
+REACT
+
+MYSQL
+
+JQUERY
+
+EXCEL
+
+XML
+
+DJANGO
+
+NUMPY
+
+PANDAS
+
+NODEJS
+
+DSA
+
+TYPESCRIPT
+
+ANGULAR
+
+ANGULARJS
+
+GIT
+
+POSTGRESQL
+
+MONGODB
+
+ASP
+
+AI
+
+R
+
+GO
+
+KOTLIN
+
+SWIFT
+
+SASS
+
+VUE
+
+GEN AI
+
+SCIPY
+
+CYBERSECURITY
+
+DATA SCIENCE
+
+INTRO TO PROGRAMMING
+
+BASH
+
+RUST
+
+React Tutorial
+
+React Home
+
+React Intro
+
+React Get Started
+
+React First App
+
+React Render HTML
+
+React Upgrade
+
+React ES6
+
+React ES6
+
+ES6 Classes
+
+ES6 Arrow Functions
+
+ES6 Variables
+
+ES6 Array map()
+
+ES6 Destructuring
+
+ES6 Spread Operator
+
+ES6 Modules
+
+ES6 Ternary Operator
+
+ES6 Template Strings
+
+React JSX Intro
+
+React JSX Expressions
+
+React JSX Attributes
+
+React JSX If Statements
+
+React Components
+
+React Class
+
+React Props
+
+React Props Destructuring
+
+React Props Children
+
+React Events
+
+React Conditionals
+
+React Lists
+
+React Forms
+
+React Forms Submit
+
+React Textarea
+
+React Select
+
+React Multiple Inputs
+
+React Checkbox
+
+React Radio
+
+React Portals
+
+React Suspense
+
+React CSS Styling
+
+React CSS Modules
+
+React CSS-in-JS
+
+React Router
+
+React Transitions
+
+React Forward Ref
+
+React HOC
+
+React Sass
+
+React Hooks
+
+What is Hooks?
+
+React useState
+
+React useEffect
+
+React useContext
+
+React useRef
+
+React useReducer
+
+React useCallback
+
+React useMemo
+
+React Custom Hooks
+
+React Exercises
+
+React Compiler
+
+React Quiz
+
+React Exercises
+
+React Syllabus
+
+React Study Plan
+
+React Server
+
+React Interview Prep
+
+React Certificate
+
+React useEffect Hooks
+
+❮ Previous
+
+Next ❯
+
+The useEffect Hook allows you to perform side effects in your components.
+
+Some examples of side effects are: fetching data, directly updating the DOM, and timers.
+
+useEffect accepts two arguments. The second argument is optional.
+
+useEffect(<function>, <dependency>)
+
+Let's use a timer as an example.
+
+Example:
+
+Use setTimeout() to count 1 second after initial render:
+
+import { useState, useEffect } from 'react';
+
+import { createRoot } from 'react-dom/client';
+
+function Timer() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+setTimeout(() => {
+
+setCount((count) => count + 1);
+
+}, 1000);
+
+});
+
+return <h1>I've rendered {count} times!</h1>;
+
+}
+
+createRoot(document.getElementById('root')).render(
+
+<Timer />
+
+);
+
+Run
+
+Example »
+
+But wait!! It keeps counting even though it should only count once!
+
+useEffect runs on every render. That means that when the count changes, a render happens, which then triggers another effect.
+
+This is not what we want. There are several ways to control when side effects run.
+
+We should always include the second parameter which accepts an array.
+
+We can optionally pass dependencies to useEffect in this array.
+
+Example
+
+1. No dependency passed:
+
+useEffect(() => {
+
+//Runs on every render
+
+});
+
+Example
+
+2. An empty array:
+
+useEffect(() => {
+
+//Runs only on the first render
+
+}, []);
+
+Example
+
+3. Props or state values:
+
+useEffect(() => {
+
+//Runs on the first render
+
+//And any time any dependency value changes
+
+}, [prop, state]);
+
+So, to fix this issue, let's only run this effect on the initial render.
+
+Example:
+
+Only run the effect on the initial render:
+
+import { useState, useEffect } from 'react';
+
+import { createRoot } from 'react-dom/client';
+
+function Timer() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+setTimeout(() => {
+
+setCount((count) => count + 1);
+
+}, 1000);
+
+}, []); // <- add empty brackets here
+
+return <h1>I've rendered {count} times!</h1>;
+
+}
+
+createRoot(document.getElementById('root')).render(
+
+<Timer />
+
+);
+
+Run
+
+Example »
+
+Example:
+
+Here is an example of a useEffect Hook that is dependent on a variable. If the count variable updates, the effect will run again:
+
+import { useState, useEffect } from 'react';
+
+import { createRoot } from 'react-dom/client';
+
+function Counter() {
+
+const [count, setCount] = useState(0);
+
+const [calculation, setCalculation] = useState(0);
+
+useEffect(() => {
+
+setCalculation(() => count * 2);
+
+}, [count]); // <- add the count variable here
+
+return (
+
+<>
+
+<p>Count: {count}</p>
+
+<button onClick={() => setCount((c) => c + 1)}>+</button>
+
+<p>Calculation: {calculation}</p>
+
+</>
+
+);
+
+}
+
+createRoot(document.getElementById('root')).render(
+
+<Counter />
+
+);
+
+Run
+
+Example »
+
+If there are multiple dependencies, they should be included in the useEffect dependency array.
+
+Effect Cleanup
+
+Some effects require cleanup to reduce memory leaks.
+
+Timeouts, subscriptions, event listeners, and other effects that are no longer needed should be disposed.
+
+We do this by including a return function at the end of the useEffect Hook.
+
+Example:
+
+Clean up the timer at the end of the useEffect Hook:
+
+import { useState, useEffect } from 'react';
+
+import { createRoot } from 'react-dom/client';
+
+function Timer() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+let timer = setTimeout(() => {
+
+setCount((count) => count + 1);
+
+}, 1000);
+
+return () => clearTimeout(timer)
+
+}, []);
+
+return <h1>I've rendered {count} times!</h1>;
+
+}
+
+createRoot(document.getElementById('root')).render(
+
+<Timer />
+
+);
+
+Run
+
+Example »
+
+Note: To clear the timer, we had to name it.
+
+❮ Previous
+
+Next ❯
+
+★
+
++1
+
+Sign in to track progress
+
+COLOR PICKER
+
+REMOVE ADS
+
+PLUS
+
+SPACES
+
+GET CERTIFIED
+
+FOR TEACHERS
+
+FOR BUSINESS
+
+CONTACT US
+
+×
+
+Contact Sales
+
+If you want to use W3Schools services as an educational institution, team or enterprise, send us an e-mail:sales@w3schools.com
+
+Report Error
+
+If you want to report an error, or if you want to make a suggestion, send us an e-mail:help@w3schools.com
+
+Top Tutorials
+
+HTML Tutorial
+
+CSS Tutorial
+
+JavaScript Tutorial
+
+How To Tutorial
+
+SQL Tutorial
+
+Python Tutorial
+
+W3.CSS Tutorial
+
+Bootstrap Tutorial
+
+PHP Tutorial
+
+Java Tutorial
+
+C++ Tutorial
+
+jQuery Tutorial
+
+Top References
+
+HTML Reference
+
+CSS Reference
+
+JavaScript Reference
+
+SQL Reference
+
+Python Reference
+
+W3.CSS Reference
+
+Bootstrap Reference
+
+PHP Reference
+
+HTML Colors
+
+Java Reference
+
+AngularJS Reference
+
+jQuery Reference
+
+Top Examples
+
+HTML Examples
+
+CSS Examples
+
+JavaScript Examples
+
+How To Examples
+
+SQL Examples
+
+Python Examples
+
+W3.CSS Examples
+
+Bootstrap Examples
+
+PHP Examples
+
+Java Examples
+
+XML Examples
+
+jQuery Examples
+
+Get Certified
+
+HTML Certificate
+
+CSS Certificate
+
+JavaScript Certificate
+
+Front End Certificate
+
+SQL Certificate
+
+Python Certificate
+
+PHP Certificate
+
+jQuery Certificate
+
+Java Certificate
+
+C++ Certificate
+
+C# Certificate
+
+XML Certificate
+
+
+
+
+
+
+
+
+
+FORUM
+
+ABOUT
+
+ACADEMY
+
+W3Schools is optimized for learning and training. Examples might be simplified to improve reading and learning.
+
+Tutorials, references, and examples are constantly reviewed to avoid errors, but we cannot warrant full correctness
+
+of all content. While using W3Schools, you agree to have read and accepted our terms of use,
+
+cookie and privacy policy.
+
+Copyright 1999-2025 by Refsnes Data. All Rights Reserved.
+
+W3Schools is Powered by W3.CSS.

@@ -15,11 +15,32 @@ function sleep(ms: number) {
  */
 export async function getAiResponse(
   prompt: string,
-  opts?: { maxRetries?: number; baseDelayMs?: number }
+  opts?: { maxRetries?: number; baseDelayMs?: number },
+  logId?: string
 ): Promise<string> {
-  const maxRetries = opts?.maxRetries ?? 3;
-  const baseDelay = opts?.baseDelayMs ?? 500;
-  log({ message: "getAiResponse called", extra: { prompt } });
+  let maxRetries = 3;
+  let baseDelay = 500;
+  try {
+    if (opts && typeof opts === "object") {
+      if (typeof (opts as any).maxRetries === "number") {
+        maxRetries = (opts as any).maxRetries;
+      }
+      if (typeof (opts as any).baseDelayMs === "number") {
+        baseDelay = (opts as any).baseDelayMs;
+      }
+    }
+  } catch (err) {
+    // If we reached here it likely means a client-only reference was passed
+    // into a server action. Provide a clear message for debugging.
+    const message =
+      "Cannot access maxRetries on the server. You cannot dot into a temporary client reference from a server component. You can only pass the value through to the client.";
+    log({
+      message: "getAiResponse:invalidOpts",
+      extra: { error: String(err) },
+    });
+    throw new Error(message);
+  }
+  log({ message: "getAiResponse called", extra: { prompt, logId } });
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -29,7 +50,7 @@ export async function getAiResponse(
       });
       log({
         message: "getAiResponse response",
-        extra: { response: response.text },
+        extra: { response: response.text, logId },
       });
       return response.text ?? "";
     } catch (err: any) {
@@ -81,6 +102,7 @@ export async function getAiResponse(
         extra: {
           attempt,
           err: { name, status, statusString, message: err?.message },
+          logId,
         },
       });
 
@@ -114,7 +136,7 @@ export async function getAiResponse(
       );
       log({
         message: "getAiResponse retrying",
-        extra: { attempt, delay, status, statusString },
+        extra: { attempt, delay, status, statusString, logId },
       });
       await sleep(delay);
     }

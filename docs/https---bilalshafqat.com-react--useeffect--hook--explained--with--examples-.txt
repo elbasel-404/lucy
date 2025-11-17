@@ -1,0 +1,357 @@
+React useEffect Hook Explained with Examples and Best Practices
+
+bilalshafqat42
+
+June 18, 2025
+
+React Js, React Hooks
+
+0 Comments
+
+Introduction: Why You Need useEffect() in React
+
+If you’ve ever wondered how to fetch data, listen to scroll events, or update the DOM in a functional component — the answer is useEffect().
+
+In React, components are declarative and reactive by design. But to handle side effects — like API calls, timers, or subscriptions — you need a special hook: useEffect().
+
+It’s one of the most powerful but also most misunderstood hooks in the React ecosystem. This guide explains what useEffect() does, how it works, and how to use it correctly in 2025 and beyond.
+
+What is useEffect()?
+
+useEffect() is a built-in React hook that lets you run side effects in your functional components.
+
+What’s a side effect?
+
+A side effect is anything that:
+
+Interacts with the outside world (APIs, localStorage)
+
+Affects something outside the component scope (event listeners, timeouts)
+
+Doesn’t happen as a result of just rendering JSX
+
+Basic Syntax:
+
+useEffect(() => {
+
+// Side effect logic
+
+}, [dependencies]);
+
+The first argument is a function that runs your effect
+
+The second argument is a dependency array that tells React when to run the effect
+
+Why is useEffect Important?
+
+Before React 16.8, stateful logic and side effects were handled in class components using lifecycle methods like componentDidMount() and componentDidUpdate().
+
+With hooks, useEffect() replaces these methods in function components — offering a more flexible and cleaner way to run side effects.
+
+You use it for:
+
+Fetching data
+
+Setting up timers or intervals
+
+Subscribing/unsubscribing to events
+
+Performing animations
+
+Updating document title or localStorage
+
+Example 1: Fetching Data on Component Mount
+
+import { useEffect, useState } from 'react';
+
+function Users() {
+
+const [users, setUsers] = useState([]);
+
+useEffect(() => {
+
+async function fetchData() {
+
+const res = await fetch('https://api.example.com/users');
+
+const data = await res.json();
+
+setUsers(data);
+
+}
+
+fetchData();
+
+}, []); // run once on mount
+
+return (
+
+<ul>
+
+{users.map(user => <li key={user.id}>{user.name}</li>)}
+
+</ul>
+
+);
+
+}
+
+Dependency Array: The Most Important Part
+
+The second argument to useEffect() is the dependency array, which determines when the effect runs.
+
+Dependency Array
+
+When the Effect Runs
+
+[]
+
+On mount (once only)
+
+[count]
+
+On mount and when count changes
+
+None
+
+On every render (not recommended)
+
+Example with dependencies:
+
+useEffect(() => {
+
+console.log("Count changed!");
+
+}, [count]);
+
+Avoiding Infinite Loops
+
+A common mistake in useEffect is causing infinite re-renders by:
+
+Forgetting the dependency array
+
+Updating state inside the effect that also triggers the same effect
+
+Bad:
+
+useEffect(() => {
+
+setCount(count + 1);
+
+});
+
+Fix:
+
+useEffect(() => {
+
+// safe logic here
+
+}, [count]);
+
+Or use functional updates:
+
+setCount(prev => prev + 1);
+
+Cleanup Functions in useEffect
+
+Some side effects — like event listeners or intervals — need cleanup to prevent memory leaks or unwanted behaviors.
+
+Example: Timer cleanup
+
+useEffect(() => {
+
+const id = setInterval(() => {
+
+console.log('Tick');
+
+}, 1000);
+
+return () => clearInterval(id);
+
+}, []);
+
+Avoiding Common useEffect Mistakes
+
+1. Forgetting to list all dependencies
+
+useEffect(() => {
+
+doSomething(message);
+
+}, [message]);
+
+2. Using async directly in useEffect
+
+useEffect() cannot be marked async because it expects a synchronous return value.
+
+Fix:
+
+useEffect(() => {
+
+async function fetchData() {
+
+const res = await fetch('/data');
+
+const result = await res.json();
+
+setData(result);
+
+}
+
+fetchData();
+
+}, []);
+
+3. Using useEffect unnecessarily
+
+If you can compute something directly in JSX or with useMemo(), do that instead.
+
+Best Practices for useEffect (2025)
+
+Keep each useEffect focused on one task
+
+Use multiple useEffects instead of combining logic
+
+Always include all dependencies
+
+Use named async functions inside effects
+
+Clean up subscriptions and timers
+
+When Not to Use useEffect
+
+You don’t always need useEffect. You might be overusing it if:
+
+You’re setting state derived from props (compute it directly)
+
+You’re using it to log state (use dev tools instead)
+
+You’re using it instead of useMemo() or useCallback()
+
+Ask yourself:
+
+“Am I doing something after render that affects the outside world?”
+
+If yes — use it. If not — you might not need it.
+
+Summary
+
+useEffect() is the most versatile React hook for handling side effects in function components.
+
+Key takeaways:
+
+It replaces lifecycle methods from class components
+
+The dependency array controls when it runs
+
+Cleanup functions prevent memory leaks
+
+Common mistakes include missing dependencies and misusing async
+
+Use it wisely, and your React apps will be cleaner, more predictable, and easier to maintain.
+
+Related Posts
+
+React useMemo Hook Explained with Real Examples and Best Practices (2025 Guide)
+
+bilalshafqat42
+
+June 26, 2025
+
+Learn how to use the React useMemo hook to optimize performance, avoid unnecessary recalculatio ..
+
+React useCallback Hook Explained with Examples and Best Practices (2025 Guide)
+
+bilalshafqat42
+
+June 25, 2025
+
+Introduction React’s useCallback is one of those hooks that seems confusing at first —  ..
+
+Leave A Comment Cancel reply
+
+Previous post React useState Hook Explained with Examples
+
+Next postReact useContext Hook Explained (With Real Examples and Best Practices)
+
+Featured posts
+
+React useImperativeHandle Hook Explained with Real Examples and Best Practices (2025 Guide)
+
+July 1, 2025
+
+React useReducer Hook Explained with Real Examples and Best Practices (2025 Guide)
+
+June 30, 2025
+
+React useMemo Hook Explained with Real Examples and Best Practices (2025 Guide)
+
+June 26, 2025
+
+Tag Cloud 3d website elements
+
+ai integration
+
+blob maker
+
+bzzzt
+
+creative designer
+
+Css
+
+css websites
+
+customizeable shapes
+
+dark mode design
+
+Flexbox
+
+glass ui
+
+gradients
+
+haikei
+
+hero patterns
+
+image compression
+
+mesh gradient
+
+minimalism
+
+moden ui design
+
+Modern Design
+
+modern trends
+
+modern user interface
+
+neumorphism
+
+patterns
+
+picular
+
+React Js
+
+reusable backgrounds
+
+shadows
+
+ui & ux design
+
+User Experience Design
+
+User Interface Design
+
+UX UI Design
+
+waves
+
+SOCIAL LINKS
+
+Share On:

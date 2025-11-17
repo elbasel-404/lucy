@@ -1,0 +1,473 @@
+React TutorialReact ExerciseReact Basic ConceptsReact ComponentsReact PropsReact HooksReact RouterReact AdvancedReact ExamplesReact Interview QuestionsReact ProjectsNext.js TutorialReact BootstrapReact Material UIReact Ant DesignReact DesktopReact RebassReact BlueprintJavaScriptWeb Technology
+
+Sign In
+
+▲
+
+Open In App
+
+ReactJS useEffect Hook
+
+Last Updated :
+
+03 Oct, 2025
+
+Comments
+
+Improve
+
+Suggest changes
+
+28 Likes
+
+Like
+
+Report
+
+The useEffect hook is one of the most commonly used hooks in ReactJS, used to handle side effects in functional components. Before hooks, these kinds of tasks were only possible in class components through lifecycle methods like componentDidMount, componentDidUpdate, and componentWillUnmount.Fetching data from an API.Setting up event listeners or subscriptions.Manipulating the DOM directly (although React generally handles DOM manipulation for you).Cleaning up resources when a component unmounts.Syntax:useEffect(() => {
+
+// Code to run on each render
+
+return () => {
+
+// Cleanup function (optional)
+
+};
+
+}, [dependencies]);Effect function: This is where your side effect code runs.Cleanup function: This optional return function cleans up side effects like subscriptions or timers when the component unmounts.Dependencies array: React re-runs the effect if any of the values in this array changeHow does it work?Initial Render Happens: React renders the component and updates the DOM.useEffect Executes After Render: It runs after the paint, not during render.Dependencies Are Checked: If there is no dependency array, the effect runs after every render; if the array is empty ([]), it runs once on mount; if dependencies are provided, it runs only when those values change.Cleanup Function Runs: Before the effect re-runs or the component unmounts, the cleanup function (returned from useEffect) is executed.Effect Re-runs: If dependencies changed, the effect runs again—after cleanup.Now let's see how to implement useEffect Hook in ReactJS
+
+JavaScript
+
+//HookCounterOne.js
+
+// useEffect is defined here
+
+import { useState, useEffect } from "react";
+
+function HookCounterOne() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+document.title = `You clicked ${count} times`;
+
+}, [count]);
+
+return (
+
+<div>
+
+<button onClick={() => setCount((prevCount) => prevCount + 1)}>
+
+Click {count} times
+
+</button>
+
+</div>
+
+);
+
+}
+
+export default HookCounterOne;
+
+JavaScript
+
+//App.js
+
+// Importing and using HookCounterOne
+
+import React from "react";
+
+import "./App.css";
+
+import HookCounterOne from "./components/HookCounterOne";
+
+function App() {
+
+return (
+
+<div className="App">
+
+<HookCounterOne />
+
+</div>
+
+);
+
+}
+
+export default App;
+
+OutputIn this example useEffect triggers a function on every component render, using React to execute specified tasks efficiently.Positioned within the component, it grants easy access to state and props without additional coding.For replicating lifecycle methods in functional components, copy and customize the provided code snippet according to your needs.Controlling side effects in useEffect1. To run useEffect on every render do not pass any dependency
+
+JavaScript
+
+import React, { useState, useEffect } from "react";
+
+function App() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+console.log("useEffect ran on every render");
+
+});
+
+return (
+
+<div>
+
+<h1>Count: {count}</h1>
+
+<button onClick={() => setCount(count + 1)}>Increment</button>
+
+</div>
+
+);
+
+}
+
+export default App;
+
+Output:useEffects2. To run useEffect only once on the first render pass any empty array in the dependency
+
+JavaScript
+
+import React, { useEffect } from 'react';
+
+function App() {
+
+useEffect(() => {
+
+console.log("This runs only once on the first render!");
+
+// You can put any initialization logic here
+
+// e.g., API call, event listener, analytics tracking
+
+}, []); // Empty array ensures it runs only on mount
+
+return (
+
+<div>
+
+<h1>useEffect with Empty Dependency Array</h1>
+
+<p>Open the console to see the effect log.</p>
+
+</div>
+
+);
+
+}
+
+export default App;
+
+Output:useEffect with Empty Dependency ArrayOpen the console to see the effect log.3. To run useEffect on change of a particular value. Pass the state and props in the dependency array
+
+JavaScript
+
+import React, { useEffect, useState } from 'react';
+
+interface AppProps {
+
+userId: number;
+
+}
+
+function App({ userId }: AppProps) {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+console.log(`Effect ran because count or userId changed!`);
+
+console.log(`Count: ${count}, User ID: ${userId}`);
+
+// Example: Fetch data when count or userId changes
+
+// fetchData(count, userId);
+
+}, [count, userId]); // Runs whenever count or userId changes
+
+return (
+
+<div>
+
+<h1>useEffect on Specific Value Change</h1>
+
+<p>Count: {count}</p>
+
+<button onClick={() => setCount(count + 1)}>Increment Count</button>
+
+</div>
+
+);
+
+}
+
+export default App;
+
+Output:Effect ran because count or userId changed!Count: 0, User ID: <value passed in props>Ways to mimic lifecycle methods using useEffect hookThe useEffect() hook is not only used for handling side effects, but it also allows functional components to replicate the behavior of class-based lifecycle methods like:Mimicking componentDidMount: To run code once when the component mounts, pass an empty dependency array ([]) to useEffect. This ensures the effect runs only once, similar to componentDidMount.useEffect(() => {
+
+console.log("Component mounted (Functional)");
+
+}, []);
+
+Mimicking componentDidUpdate : To run code every time a specific state or prop changes, include those variables in the dependency array. This simulates componentDidUpdate.useEffect(() => {
+
+console.log("Component updated (Functional)");
+
+}, [value1, value2]);
+
+Mimicking componentWillUnmount: To run cleanup logic when the component unmounts, return a cleanup function from useEffect. This simulates componentWillUnmount.useEffect(() => {
+
+return () => {
+
+console.log("Component unmounted (Functional)");
+
+};
+
+}, []);Cleaning Up Side EffectsuseEffect allows you to clean up after your effects by returning a cleanup function. This is particularly useful for:Removing event listeners.Canceling network requests.Clearing timers or intervals.For example, if you're setting up a timer, you can clean it up when the component unmounts or when dependencies change.
+
+JavaScript
+
+import { useEffect, useState } from "react";
+
+function TimerComponent() {
+
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+
+const interval = setInterval(() => {
+
+setCount((prev) => prev + 1);
+
+}, 1000);
+
+//Cleanup function to clear the interval
+
+return () => {
+
+clearInterval(interval);
+
+console.log("Interval cleared");
+
+};
+
+}, []); // Runs only once when the component mounts
+
+return <h1>Timer: {count} seconds</h1>;
+
+}
+
+export default TimerComponent;
+
+Output:output
+
+Create Quiz
+
+ReactJS useEffect Hook
+
+Visit Course
+
+ReactJS useEffect Hook
+
+useEffects Hooks in React
+
+React hooks : The Use Effect hook Dependency list & clean function
+
+Comment
+
+R
+
+rajukumar19
+
+Follow
+
+28
+
+Improve
+
+R
+
+rajukumar19
+
+Follow
+
+28
+
+Improve
+
+Article Tags :
+
+Web Technologies
+
+Write From Home
+
+ReactJS
+
+React-Hooks
+
+Explore
+
+React Tutorial
+
+5 min read
+
+React FundamentalsReact Introduction
+
+6 min read
+
+React Environment Setup
+
+3 min read
+
+React JS ReactDOM
+
+2 min read
+
+React JSX
+
+5 min read
+
+ReactJS Rendering Elements
+
+3 min read
+
+React Lists
+
+4 min read
+
+React Forms
+
+4 min read
+
+ReactJS Keys
+
+4 min read
+
+Components in ReactReact Components
+
+4 min read
+
+ReactJS Functional Components
+
+4 min read
+
+React Class Components
+
+3 min read
+
+ReactJS Pure Components
+
+4 min read
+
+ReactJS Container and Presentational Pattern in Components
+
+2 min read
+
+ReactJS PropTypes
+
+5 min read
+
+React Lifecycle
+
+7 min read
+
+React HooksReact Hooks
+
+8 min read
+
+React useState Hook
+
+5 min read
+
+ReactJS useEffect Hook
+
+5 min read
+
+Routing in ReactReact Router
+
+5 min read
+
+React JS Types of Routers
+
+10 min read
+
+Advanced React ConceptsLazy Loading in React and How to Implement it ?
+
+4 min read
+
+ReactJS Higher-Order Components
+
+5 min read
+
+Code Splitting in React
+
+4 min read
+
+React ProjectsCreate ToDo App using ReactJS
+
+3 min read
+
+Create a Quiz App using ReactJS
+
+4 min read
+
+Create a Coin Flipping App using ReactJS
+
+3 min read
+
+How to create a Color-Box App using ReactJS?
+
+4 min read
+
+Dice Rolling App using ReactJS
+
+4 min read
+
+Guess the number with React
+
+3 min read
+
+Like
+
+Improvement
+
+Suggest changes
+
+Suggest Changes
+
+Help us improve. Share your suggestions to enhance the article. Contribute your expertise and make a difference in the GeeksforGeeks portal.
+
+Create Improvement
+
+Enhance the article with your expertise. Contribute to the GeeksforGeeks community and help create better learning resources for all.
+
+Suggest Changes
+
+min 4 words, max Words Limit:1000
+
+Thank You!
+
+Your suggestions are valuable to us.
+
+What kind of Experience do you want to share?
+
+Interview Experiences
+
+Admission Experiences
+
+Career Journeys
+
+Work Experiences
+
+Campus Experiences
+
+Competitive Exam Experiences

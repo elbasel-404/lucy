@@ -43,12 +43,21 @@ Notes: The function scrapes DuckDuckGo's HTML page and uses a server-side fetch 
   - **readJson.ts**: Reads and parses JSON files.
 
 - **workflow/**: Higher-level sequences that combine search, scraping, AI, and I/O.
+
   - **searchToAi.ts**: Runs a search and returns an AI summary of the top results.
   - **gatherInfo.ts**: Orchestrates a deep search + scrape + convert flow. It:
+
+    ⚠️ When calling server actions from client components, make sure to pass plain serializable values (numbers/strings). Do not pass React refs, component instances, or other client-only references as the action's `options` argument — doing so will trigger an error like:
+
+    "Cannot access maxSearchResults on the server. You cannot dot into a temporary client reference from a server component. You can only pass the value through to the client."
+
+    Instead, pass the raw values. Example: `gatherInfo(prompt, { maxSearchResults: 6 })`.
+
     1. Runs a DuckDuckGo search for the user prompt
     2. Downloads and converts the top N result pages to Markdown via `webdownloadPage`
     3. Runs `retrieveSavedInfo` to find the most relevant saved docs
     4. Asks the AI to synthesize a final answer using those documents and returns an object with metadata and the `answer`
+
     - The function checks whether the `docs/<normalized-filename>.md` file exists and will skip downloads for already-scraped pages unless you pass `options.force = true`.
 
 Example:
