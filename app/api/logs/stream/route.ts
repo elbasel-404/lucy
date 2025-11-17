@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerLogs, subscribeServerLogs } from "../../../server/logs/logStore";
+import {
+  getServerLogs,
+  subscribeServerLogs,
+} from "../../../server/logs/logStore";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -14,9 +17,7 @@ export async function GET(request: Request) {
       try {
         const existing = getServerLogs(logId);
         for (const e of existing) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(e)}\n\n`)
-          );
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
         }
       } catch (e) {
         // ignore
@@ -24,7 +25,9 @@ export async function GET(request: Request) {
 
       const onLog = (entry: any) => {
         try {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(entry)}\n\n`));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(entry)}\n\n`)
+          );
         } catch (err) {
           // ignore
         }

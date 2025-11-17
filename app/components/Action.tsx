@@ -160,7 +160,10 @@ export function Action<T, Args extends unknown[]>({
         es.onmessage = (ev: MessageEvent) => {
           try {
             const data = JSON.parse(ev.data);
-            addLog((data.level as any) || "info", data.message || JSON.stringify(data.extra || {}));
+            addLog(
+              (data.level as any) || "info",
+              data.message || JSON.stringify(data.extra || {})
+            );
           } catch (err) {
             addLog("info", ev.data ?? String(ev));
           }

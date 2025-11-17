@@ -33,10 +33,7 @@ export function listServerLogIds() {
   return Array.from(store.keys());
 }
 
-export function subscribeServerLogs(
-  logId: string,
-  cb: (entry: any) => void
-) {
+export function subscribeServerLogs(logId: string, cb: (entry: any) => void) {
   const set = listeners.get(logId) || new Set();
   set.add(cb);
   listeners.set(logId, set);

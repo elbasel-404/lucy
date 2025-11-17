@@ -31,7 +31,10 @@ export async function retrieveSavedInfo(
   options?: { minScore?: number; maxFiles?: number },
   logId?: string
 ): Promise<RetrievedFile[]> {
-  log({ message: "retrieveSavedInfo called", extra: { query, options, logId } });
+  log({
+    message: "retrieveSavedInfo called",
+    extra: { query, options, logId },
+  });
 
   const docsFolder = join(process.cwd(), "docs");
   try {
