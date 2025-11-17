@@ -73,10 +73,15 @@ export async function getAiResponse(
       const statusString =
         statusStringCandidates.find((s) => typeof s === "string") ?? undefined;
 
-      const name = err?.name || (typeof err?.code === "string" ? err.code : "UnknownError");
+      const name =
+        err?.name ||
+        (typeof err?.code === "string" ? err.code : "UnknownError");
       log({
         message: "getAiResponse error",
-        extra: { attempt, err: { name, status, statusString, message: err?.message } },
+        extra: {
+          attempt,
+          err: { name, status, statusString, message: err?.message },
+        },
       });
 
       // If final attempt or non-retryable status -> rethrow
@@ -90,9 +95,13 @@ export async function getAiResponse(
         "TOO_MANY_REQUESTS",
         "ABORTED",
       ];
-      const shouldRetryNumber = typeof status === "number" && retryableStatus.includes(status);
+      const shouldRetryNumber =
+        typeof status === "number" && retryableStatus.includes(status);
       const shouldRetryString =
-        typeof statusString === "string" && retryableStatusStrings.some((r) => statusString?.toUpperCase().includes(r));
+        typeof statusString === "string" &&
+        retryableStatusStrings.some((r) =>
+          statusString?.toUpperCase().includes(r)
+        );
 
       if (attempt >= maxRetries || (!shouldRetryNumber && !shouldRetryString)) {
         // Not retrying — rethrow the original error so callers can inspect it.
