@@ -24,18 +24,27 @@ export async function convertToMarkdown(text: string): Promise<string> {
 
   try {
     const prompt = `You are an assistant that converts raw webpage text into tidy Markdown.\n
-Rules:\n- Remove navigation labels, site footer, 'read more', share buttons, related links, and ads.\n- Remove repeated or boilerplate lines (e.g., 'Home', 'Contact', 'Subscribe', 'Share').\n- Preserve article headings, paragraphs, lists and code blocks.\n- Convert bare URLs into markdown links where possible.\n- If there are author/timestamp lines, remove them unless they are integral to the content.\n- Remove inline style or script artifacts and image placeholders, but preserve captions as plain text if relevant.\n- Output should be only Markdown, concise and clean.\n\nExample input:\n${text.slice(0, 400)}\n\nPlease convert the input to Markdown now:`;
+Rules:\n- Remove navigation labels, site footer, 'read more', share buttons, related links, and ads.\n- Remove repeated or boilerplate lines (e.g., 'Home', 'Contact', 'Subscribe', 'Share').\n- Preserve article headings, paragraphs, lists and code blocks.\n- Convert bare URLs into markdown links where possible.\n- If there are author/timestamp lines, remove them unless they are integral to the content.\n- Remove inline style or script artifacts and image placeholders, but preserve captions as plain text if relevant.\n- Output should be only Markdown, concise and clean.\n\nExample input:\n${text.slice(
+      0,
+      400
+    )}\n\nPlease convert the input to Markdown now:`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
     });
 
-    log({ message: "convertToMarkdown response", extra: { response: response.text?.slice(0, 200) } });
+    log({
+      message: "convertToMarkdown response",
+      extra: { response: response.text?.slice(0, 200) },
+    });
 
     return response.text ?? performLocalMarkdownCleanup(text);
   } catch (err) {
-    log({ message: "convertToMarkdown fallback", extra: { error: String(err) } });
+    log({
+      message: "convertToMarkdown fallback",
+      extra: { error: String(err) },
+    });
     return performLocalMarkdownCleanup(text);
   }
 }
@@ -66,7 +75,12 @@ function performLocalMarkdownCleanup(text: string): string {
   const filtered = lines.filter((line, idx) => {
     if (!line) return false; // remove empty lines
     const low = line.toLowerCase();
-    if (navKeywords.some((k) => low === k || low.startsWith(k + " ") || low.endsWith(" " + k))) return false;
+    if (
+      navKeywords.some(
+        (k) => low === k || low.startsWith(k + " ") || low.endsWith(" " + k)
+      )
+    )
+      return false;
     if (low.match(/^\d{1,2}:\d{1,2}(:\d{1,2})?\s*(am|pm)?$/)) return false; // times
     if (low.match(/^\d{4}-\d{2}-\d{2}/)) return false; // dates
     if (low.length < 20 && low.split(" ").length < 3) return false; // short noise lines
@@ -76,7 +90,10 @@ function performLocalMarkdownCleanup(text: string): string {
   let cleaned = filtered.join("\n\n");
 
   // Convert plain URLs to markdown links
-  cleaned = cleaned.replace(/(?<!\])\bhttps?:\/\/[^\s)]+/g, (url) => `[${url}](${url})`);
+  cleaned = cleaned.replace(
+    /(?<!\])\bhttps?:\/\/[^\s)]+/g,
+    (url) => `[${url}](${url})`
+  );
 
   // Normalize multiple blank lines
   cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
