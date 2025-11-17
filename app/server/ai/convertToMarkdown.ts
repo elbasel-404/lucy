@@ -26,7 +26,7 @@ export async function convertToMarkdown(text: string): Promise<string> {
     // This prompt tells the AI explicitly that the input is raw text and
     // that it must output valid Markdown only (no analysis or commentary).
     const prompt =
-      "convert the following text to markdown format:\n\n, don't start your response with '```'" +
+      "convert the following text to markdown format: , don't start your response with '```'" +
       text;
     // Use the streaming API to avoid truncation for long outputs
     const model = "gemini-2.5-flash";

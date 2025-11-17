@@ -1,10 +1,10 @@
 "use server";
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
-import { log } from "../utils/log";
-import { scrapeWebpage } from "./web/scrapeWebpage";
-import { convertToMarkdown } from "./ai/convertToMarkdown";
-import { normalizeUrl } from "../utils/normalizeUrl";
+import { log } from "../../utils/log";
+import { scrapeWebpage } from "./scrapeWebpage";
+import { convertToMarkdown } from "../ai/convertToMarkdown";
+import { normalizeUrl } from "../../utils/normalizeUrl";
 
 /**
  * Download a URL, convert the readable text to Markdown, and write it to /docs/
