@@ -1,6 +1,7 @@
 import { Action } from "./components/Action";
 import { convertToMarkdown } from "./server/ai/convertToMarkdown";
 import { getAiResponse } from "./server/ai/getAiResponse";
+import { retrieveSavedInfo } from "./server/ai/retrieveSavedInfo";
 import { getSearchResults } from "./server/web/getSearchResults";
 import { scrapeWebpage } from "./server/web/scrapeWebpage";
 import { webdownloadPage } from "./server/web/webdownloadPage";
@@ -10,7 +11,7 @@ export default async function Home() {
   return (
     <main>
       <Action
-        action={webdownloadPage}
+        action={retrieveSavedInfo}
         renderOutput
         inputParams={[
           {
