@@ -104,16 +104,11 @@ export function JSONView({ data, className }: JSONProps) {
   const isObject = getType(data) === "object" && data !== null;
   return (
     <pre
-      className={className}
+      className={`motion-preset-fade motion-opacity-in-0 motion-translate-y-in-4 bg-black text-gray-200 p-4 rounded-lg overflow-x-auto text-base font-mono m-0 border border-gray-800 shadow ${
+        className ?? ""
+      }`}
       style={{
-        background: "#000",
-        color: "#d4d4d4",
-        padding: "1em",
-        borderRadius: "6px",
-        overflowX: "auto",
-        fontSize: "1em",
-        fontFamily: "Fira Mono, Menlo, monospace",
-        margin: 0,
+        transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
       <code>

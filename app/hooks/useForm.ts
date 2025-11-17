@@ -38,11 +38,13 @@ type UseFormOptions<Args extends unknown[], T> = {
  * @property {Error | null} error - Error if any
  * @property {() => Promise<void>} submit - Call to submit the form
  */
-type UseFormReturn<T> = {
+type UseFormReturn<T, Args extends unknown[]> = {
   loading: boolean;
   data: T | null;
   error: Error | null;
   submit: () => Promise<void>;
+  setArgs: (args: Args) => void;
+  args: Args;
 };
 
 /**
@@ -66,8 +68,10 @@ type UseFormReturn<T> = {
 export function useForm<T, Args extends unknown[]>(
   callback: (...args: Args) => Promise<T>,
   options?: UseFormOptions<Args, T>
-): UseFormReturn<T> {
-  const { config = {}, args = [] as unknown as Args } = options || {};
+): UseFormReturn<T, Args> {
+  const { config = {}, args: initialArgs = [] as unknown as Args } =
+    options || {};
+  const [args, setArgs] = useState<Args>(initialArgs);
   // Track loading, data, and error state
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<T | null>(null);
@@ -114,5 +118,7 @@ export function useForm<T, Args extends unknown[]>(
     data: config.optimistic ? optimisticData : data,
     error,
     submit,
+    setArgs,
+    args,
   };
 }

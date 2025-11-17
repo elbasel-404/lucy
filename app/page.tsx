@@ -1,6 +1,6 @@
 import { Action } from "./components/Action";
 import { getAiResponse } from "./server/ai/getAiResponse";
-import { generateImage } from "./server/generateImage";
+// import { generateImage } from "./server/generateImage";
 
 export default async function Home() {
   return (
@@ -10,6 +10,15 @@ export default async function Home() {
         args={["hello"]}
         title="getAiResponse"
         renderOutput
+        inputParams={[
+          {
+            label: "prompt",
+            name: "prompt",
+            defaultValue: "",
+            placeholder: "prompt",
+            type: "text",
+          },
+        ]}
       />
     </main>
   );
