@@ -13,6 +13,7 @@ export async function GET(request: Request) {
 
   const stream = new ReadableStream({
     start(controller) {
+      console.debug("SSE: new connection", logId);
       // send existing logs as a batch
       try {
         const existing = getServerLogs(logId);
@@ -25,6 +26,8 @@ export async function GET(request: Request) {
 
       const onLog = (entry: any) => {
         try {
+          // debug: echo when sending a new log over SSE
+          console.debug(`SSE: dispatch ${logId}`, entry);
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify(entry)}\n\n`)
           );
@@ -34,6 +37,7 @@ export async function GET(request: Request) {
       };
 
       const unsub = subscribeServerLogs(logId, onLog);
+      console.debug("SSE: subscribed", logId);
 
       // send keepalive pings to avoid proxy closing idle connections
       const keepalive = setInterval(() => {

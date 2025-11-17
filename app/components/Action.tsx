@@ -168,16 +168,65 @@ export function Action<T, Args extends unknown[]>({
             addLog("info", ev.data ?? String(ev));
           }
         };
+        es.onopen = () => {
+          console.debug("SSE: open", logId);
+        };
         es.onerror = (err) => {
+          console.debug("SSE: error", logId, err);
           // If SSE fails, close and fall back to polling
           try {
             es.close();
           } catch (e) {}
           usingSSE = false;
-          startPolling();
+          // try fetch-stream fallback before polling
+          startFetchStream().catch(() => startPolling());
         };
         return true;
       } catch (err) {
+        return false;
+      }
+    }
+
+    // fetch-stream fallback: perform a streaming fetch and manually parse
+    // server-sent 'data: ' lines. This works when EventSource is blocked or
+    // not available.
+    async function startFetchStream() {
+      if (typeof window === "undefined") return false;
+      const controller = new AbortController();
+      try {
+        const res = await fetch(`/api/logs/stream?logId=${encodeURIComponent(logId)}`, {
+          signal: controller.signal,
+        });
+        if (!res.body) return false;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf("\n\n")) !== -1) {
+            const chunk = buf.slice(0, idx).trim();
+            buf = buf.slice(idx + 2);
+            const lines = chunk.split(/\r?\n/);
+            for (const ln of lines) {
+              if (!ln.startsWith("data:")) continue;
+              const json = ln.slice(5).trim();
+              try {
+                const data = JSON.parse(json);
+                addLog((data.level as any) || "info", data.message || JSON.stringify(data.extra || {}));
+              } catch (err) {
+                addLog("info", json);
+              }
+            }
+          }
+        }
+        return true;
+      } catch (err) {
+        try {
+          controller.abort();
+        } catch {}
         return false;
       }
     }

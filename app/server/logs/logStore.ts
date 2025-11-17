@@ -14,6 +14,7 @@ export function addServerLog(
   // limit to last 200 entries
   if (arr.length > 200) arr.splice(0, arr.length - 200);
   store.set(logId, arr);
+  console.debug("logStore: addLog", logId, entry);
   // notify listeners for real-time streaming
   const set = listeners.get(String(logId));
   if (set) {
@@ -34,6 +35,7 @@ export function listServerLogIds() {
 }
 
 export function subscribeServerLogs(logId: string, cb: (entry: any) => void) {
+  console.debug(`logStore: subscribe ${logId}`);
   const set = listeners.get(logId) || new Set();
   set.add(cb);
   listeners.set(logId, set);
