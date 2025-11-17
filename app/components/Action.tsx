@@ -194,9 +194,12 @@ export function Action<T, Args extends unknown[]>({
       if (typeof window === "undefined") return false;
       const controller = new AbortController();
       try {
-        const res = await fetch(`/api/logs/stream?logId=${encodeURIComponent(logId)}`, {
-          signal: controller.signal,
-        });
+        const res = await fetch(
+          `/api/logs/stream?logId=${encodeURIComponent(logId)}`,
+          {
+            signal: controller.signal,
+          }
+        );
         if (!res.body) return false;
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -215,7 +218,10 @@ export function Action<T, Args extends unknown[]>({
               const json = ln.slice(5).trim();
               try {
                 const data = JSON.parse(json);
-                addLog((data.level as any) || "info", data.message || JSON.stringify(data.extra || {}));
+                addLog(
+                  (data.level as any) || "info",
+                  data.message || JSON.stringify(data.extra || {})
+                );
               } catch (err) {
                 addLog("info", json);
               }
