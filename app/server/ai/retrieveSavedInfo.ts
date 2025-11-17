@@ -41,6 +41,9 @@ export async function retrieveSavedInfo(
 
     if (!mdFiles.length) return [];
 
+    const maxFiles =
+      typeof options?.maxFiles === "number" ? options!.maxFiles! : 10;
+
     // Build a single prompt that contains filenames only (no file contents)
     // Ask the model to return a JSON array with fields: filename, score, relevant, snippet, reason
     const promptSections = mdFiles
@@ -58,8 +61,14 @@ export async function retrieveSavedInfo(
       aiResponse = await getAiResponse(prompt);
     } catch (err) {
       // Log error and attempt a local fallback heuristic (content-based scoring)
-      log({ message: "retrieveSavedInfo: getAiResponse failed", extra: { err } });
-      const fallback = await heuristicFallback(mdFiles, query, docsFolder, options);
+      log({
+        message: "retrieveSavedInfo: getAiResponse failed",
+        extra: { err },
+      });
+      const fallback = await heuristicFallback(mdFiles, query, docsFolder, {
+        minScore: options?.minScore,
+        maxFiles,
+      });
       return fallback;
     }
     log({ message: "retrieveSavedInfo: aiResponse", extra: { aiResponse } });
@@ -68,9 +77,13 @@ export async function retrieveSavedInfo(
     const jsonText = extractJsonFromString(aiResponse);
     if (!jsonText) {
       log({
-        message: "retrieveSavedInfo: failed to locate JSON in AI response, falling back to heuristic",
+        message:
+          "retrieveSavedInfo: failed to locate JSON in AI response, falling back to heuristic",
       });
-      const fallback = await heuristicFallback(mdFiles, query, docsFolder, options);
+      const fallback = await heuristicFallback(mdFiles, query, docsFolder, {
+        minScore: options?.minScore,
+        maxFiles,
+      });
       return fallback;
     }
 
@@ -88,8 +101,7 @@ export async function retrieveSavedInfo(
       const filtered = cleaned
         .sort((a, b) => b.score - a.score)
         .filter((c, idx) => {
-          if (typeof options?.maxFiles === "number" && idx >= options.maxFiles)
-            return false;
+          if (idx >= maxFiles) return false;
           if (typeof options?.minScore === "number")
             return c.score >= options.minScore;
           return true;
@@ -97,10 +109,14 @@ export async function retrieveSavedInfo(
       return filtered;
     } catch (err) {
       log({
-        message: "retrieveSavedInfo: failed to parse JSON, falling back to heuristic",
+        message:
+          "retrieveSavedInfo: failed to parse JSON, falling back to heuristic",
         extra: { err, aiResponse },
       });
-      const fallback = await heuristicFallback(mdFiles, query, docsFolder, options);
+      const fallback = await heuristicFallback(mdFiles, query, docsFolder, {
+        minScore: options?.minScore,
+        maxFiles,
+      });
       return fallback;
     }
   } catch (err) {
@@ -152,7 +168,10 @@ async function heuristicFallback(
         const content = await readFile(join(docsFolder, filename), "utf-8");
         return { filename, content: content.slice(0, 1000) };
       } catch (err) {
-        log({ message: "heuristicFallback: error reading file", extra: { filename, err } });
+        log({
+          message: "heuristicFallback: error reading file",
+          extra: { filename, err },
+        });
         return { filename, content: "" };
       }
     })
@@ -162,7 +181,9 @@ async function heuristicFallback(
     const lower = (f.filename + "\n" + f.content).toLowerCase();
     let count = 0;
     for (const t of tokens) {
-      const matches = lower.match(new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"));
+      const matches = lower.match(
+        new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")
+      );
       count += matches ? matches.length : 0;
     }
     // Simple scale: more matches -> higher score, limited to 100
@@ -176,11 +197,15 @@ async function heuristicFallback(
     } as RetrievedFile;
   });
 
+  const maxFilesLocal =
+    typeof options?.maxFiles === "number" ? options!.maxFiles! : 10;
   const filtered = scored
     .sort((a, b) => b.score - a.score)
     .filter((c, idx) => {
-      if (typeof options?.maxFiles === "number" && idx >= options.maxFiles) return false;
-      if (typeof options?.minScore === "number") return c.score >= options.minScore;
+      if (typeof options?.maxFiles === "number" && idx >= options.maxFiles)
+        return false;
+      if (typeof options?.minScore === "number")
+        return c.score >= options.minScore;
       return true;
     });
   return filtered;

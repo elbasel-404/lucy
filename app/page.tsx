@@ -11,7 +11,7 @@ export default async function Home() {
   return (
     <main>
       <Action
-        action={retrieveSavedInfo}
+        action={getAiResponse}
         renderOutput
         inputParams={[
           {

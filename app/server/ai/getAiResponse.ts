@@ -33,7 +33,8 @@ export async function getAiResponse(
       });
       return response.text ?? "";
     } catch (err: any) {
-      const status = err?.status || err?.statusCode || err?.code || err?.response?.status;
+      const status =
+        err?.status || err?.statusCode || err?.code || err?.response?.status;
       const name = err?.name || err?.code || "UnknownError";
       log({
         message: "getAiResponse error",
@@ -42,12 +43,17 @@ export async function getAiResponse(
 
       // If final attempt or non-retryable status -> rethrow
       const retryableStatus = [429, 500, 502, 503, 504];
-      if (attempt >= maxRetries || (status && !retryableStatus.includes(Number(status)))) {
+      if (
+        attempt >= maxRetries ||
+        (status && !retryableStatus.includes(Number(status)))
+      ) {
         throw err;
       }
 
       // Exponential backoff with jitter
-      const delay = Math.round(baseDelay * Math.pow(2, attempt) * (0.8 + Math.random() * 0.4));
+      const delay = Math.round(
+        baseDelay * Math.pow(2, attempt) * (0.8 + Math.random() * 0.4)
+      );
       log({ message: "getAiResponse retrying", extra: { attempt, delay } });
       await sleep(delay);
     }
