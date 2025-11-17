@@ -127,13 +127,8 @@ export function Action<T, Args extends unknown[]>({
       <header className="flex flex-col gap-3 border-b border-gray-700/50 pb-5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-3xl font-bold text-white tracking-tight">
-            {title}
+            {actionUrl}
           </h2>
-          {actionUrl && (
-            <code className="text-xs font-mono bg-gray-800/80 text-emerald-400 rounded-lg px-3 py-1.5 border border-gray-700">
-              {actionUrl}
-            </code>
-          )}
         </div>
         {loading && (
           <div className="flex items-center gap-2 text-sm text-blue-400">

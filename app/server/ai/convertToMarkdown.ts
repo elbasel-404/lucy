@@ -2,7 +2,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { log } from "../../utils/log";
 
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 /**
  * Convert raw scraped text into cleaned Markdown.
@@ -23,80 +23,63 @@ export async function convertToMarkdown(text: string): Promise<string> {
   if (!text) return "";
 
   try {
-    const prompt = `You are an assistant that converts raw webpage text into tidy Markdown.\n
-Rules:\n- Remove navigation labels, site footer, 'read more', share buttons, related links, and ads.\n- Remove repeated or boilerplate lines (e.g., 'Home', 'Contact', 'Subscribe', 'Share').\n- Preserve article headings, paragraphs, lists and code blocks.\n- Convert bare URLs into markdown links where possible.\n- If there are author/timestamp lines, remove them unless they are integral to the content.\n- Remove inline style or script artifacts and image placeholders, but preserve captions as plain text if relevant.\n- Output should be only Markdown, concise and clean.\n\nExample input:\n${text.slice(
-      0,
-      400
-    )}\n\nPlease convert the input to Markdown now:`;
+    // This prompt tells the AI explicitly that the input is raw text and
+    // that it must output valid Markdown only (no analysis or commentary).
+    const prompt =
+      "convert the following text to markdown format:\n\n, don't start your response with '```'" +
+      text;
+    // Use the streaming API to avoid truncation for long outputs
+    const model = "gemini-2.5-flash";
+    const config = {
+      // Request a large output token allowance for long Markdown conversions.
+      // Adjust as needed if you observe model-level limits or errors.
+      // maxOutputTokens: 32768,
+      // temperature: 0,
+    };
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const streamResponse = await ai.models.generateContent({
+      model,
+      config,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
     });
 
-    log({
-      message: "convertToMarkdown response",
-      extra: { response: response.text?.slice(0, 200) },
-    });
-
-    return response.text ?? performLocalMarkdownCleanup(text);
+    const aiResponse = await streamResponse.text;
+    return aiResponse || "error";
+    // let aiOutput = "";
+    // for await (const chunk of streamResponse) {
+    //   // chunk may contain text directly in chunk.text
+    //   if (chunk.text) {
+    //     aiOutput += chunk.text;
+    //     continue;
+    //   }
+    //   // The SDK may also provide content in nested candidate->parts
+    //   const candidate = chunk.candidates?.[0];
+    //   if (!candidate || !candidate.content?.parts) continue;
+    //   for (const part of candidate.content.parts) {
+    //     if (typeof part.text === "string") aiOutput += part.text;
+    //   }
+    // }
+    // If the model returned something that doesn't look like Markdown (eg. HTML or plain text),
+    // fallback to the local cleanup. This helps when the model ignores the "output only Markdown" rule.
+    // if (aiOutput && !isLikelyMarkdown(aiOutput)) {
+    //   log({
+    //     message:
+    //       "convertToMarkdown: AI returned non-markdown, running fallback",
+    //   });
+    //   return performLocalMarkdownCleanup(aiOutput || text);
+    // }
   } catch (err) {
     log({
       message: "convertToMarkdown fallback",
       extra: { error: String(err) },
     });
-    return performLocalMarkdownCleanup(text);
+    // On errors, return a best-effort original input. You may implement
+    // local markdown cleanup here instead of returning the raw text.
+    return text;
   }
-}
-
-/**
- * Lightweight local cleanup in case AI is unavailable.
- * This uses simple heuristics to remove navigational/boilerplate content
- * and convert simple URL-ish strings into Markdown links.
- */
-function performLocalMarkdownCleanup(text: string): string {
-  // Remove common navigation/footer markers and small repeated labels
-  const lines = text.split(/\r?\n/).map((line) => line.trim());
-
-  const navKeywords = [
-    "home",
-    "about",
-    "contact",
-    "privacy",
-    "terms",
-    "subscribe",
-    "read more",
-    "share",
-    "related",
-    "©",
-    "follow",
-  ];
-
-  const filtered = lines.filter((line, idx) => {
-    if (!line) return false; // remove empty lines
-    const low = line.toLowerCase();
-    if (
-      navKeywords.some(
-        (k) => low === k || low.startsWith(k + " ") || low.endsWith(" " + k)
-      )
-    )
-      return false;
-    if (low.match(/^\d{1,2}:\d{1,2}(:\d{1,2})?\s*(am|pm)?$/)) return false; // times
-    if (low.match(/^\d{4}-\d{2}-\d{2}/)) return false; // dates
-    if (low.length < 20 && low.split(" ").length < 3) return false; // short noise lines
-    return true;
-  });
-
-  let cleaned = filtered.join("\n\n");
-
-  // Convert plain URLs to markdown links
-  cleaned = cleaned.replace(
-    /(?<!\])\bhttps?:\/\/[^\s)]+/g,
-    (url) => `[${url}](${url})`
-  );
-
-  // Normalize multiple blank lines
-  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
-
-  return cleaned.trim();
 }
