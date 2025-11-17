@@ -1,4 +1,3 @@
-"use server";
 import { z, ZodSchema, ZodError } from "zod";
 import { log } from "../utils/log";
 

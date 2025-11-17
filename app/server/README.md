@@ -7,6 +7,23 @@ This folder contains server-side logic and API handlers for the application.
 - **action.ts**: Handles server-side actions, likely for API endpoints or business logic.
 - **generateImage.ts**: Contains logic for generating images, possibly using external APIs or libraries.
 - **get.ts**: Implements GET request handling for server endpoints.
+- **getSearchResults.ts**: Utility to fetch search results from DuckDuckGo's Instant Answer API for a given query.
+
+### getSearchResults usage
+
+This helper queries the DuckDuckGo Instant Answer API and returns a parsed list of results.
+
+Example usage in server code:
+
+```ts
+import { getSearchResults } from "./getSearchResults";
+
+const r = await getSearchResults("open source ai");
+console.log(r.results);
+```
+
+Notes: The function uses `fetchWithCache` to avoid refetching identical queries in short succession.
+
 - **post.ts**: Implements POST request handling for server endpoints.
 - **validate.ts**: Contains validation logic for server-side data.
 

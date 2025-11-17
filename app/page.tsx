@@ -1,12 +1,13 @@
 import { Action } from "./components/Action";
 import { getAiResponse } from "./server/ai/getAiResponse";
+import { getSearchResults } from "./server/getSearchResults";
 // import { generateImage } from "./server/generateImage";
 
 export default async function Home() {
   return (
     <main>
       <Action
-        action={getAiResponse}
+        action={getSearchResults}
         args={["hello"]}
         title="getAiResponse"
         renderOutput
