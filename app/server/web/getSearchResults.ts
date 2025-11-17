@@ -1,7 +1,7 @@
 "use server";
 
-import { fetchWithCache } from "./action";
-import { log } from "../utils/log";
+import { fetchWithCache } from "../http/action";
+import { log } from "../../utils/log";
 
 export type SearchResult = {
   title: string;

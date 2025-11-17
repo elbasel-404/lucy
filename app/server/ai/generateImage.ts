@@ -1,7 +1,7 @@
 "use server";
 
 import { GoogleGenAI } from "@google/genai";
-import { log } from "../utils/log";
+import { log } from "../../utils/log";
 import mime from "mime";
 import { writeFile } from "fs";
 

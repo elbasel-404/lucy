@@ -1,23 +1,26 @@
 "use server";
-import { fetchWithCache } from "./action";
-import { log } from "../utils/log";
-import { normalizeUrl } from "../server/http/normalizeUrl";
-import { fileExists } from "../server/io/fileExists";
-import { readJson } from "../server/io/readJson";
-import { saveFile } from "../utils/saveFile";
-import { dynamicImportType } from "../server/io/dynamicImportType";
 
-type GetArgs = {
+import { saveFile } from "@/app/utils/saveFile";
+import { log } from "console";
+import { dynamicImportType } from "../io/dynamicImportType";
+import { fileExists } from "../io/fileExists";
+import { readJson } from "../io/readJson";
+import { fetchWithCache } from "./action";
+import { normalizeUrl } from "../../utils/normalizeUrl";
+
+type PostArgs = {
   url: string;
+  body: any;
   schema?: any;
   fetchOptions?: RequestInit;
 };
 
-export async function get<T = any>({
+export async function post<T = any>({
   url,
+  body,
   schema,
   fetchOptions,
-}: GetArgs): Promise<{ data?: T; error?: string }> {
+}: PostArgs): Promise<{ data?: T; error?: string }> {
   const jsonFolder = "app/json";
   const typesFolder = "app/types";
   const normalized = normalizeUrl(url);
@@ -53,7 +56,13 @@ export async function get<T = any>({
   // Fetch from server
   const result = await fetchWithCache<T>(url, {
     ...fetchOptions,
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(fetchOptions?.headers || {}),
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
     schema,
   });
   if (result.data) {
