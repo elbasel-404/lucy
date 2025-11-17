@@ -33,20 +33,69 @@ export async function getAiResponse(
       });
       return response.text ?? "";
     } catch (err: any) {
-      const status =
-        err?.status || err?.statusCode || err?.code || err?.response?.status;
-      const name = err?.name || err?.code || "UnknownError";
+      // Try to robustly extract an HTTP numeric status or string status from
+      // several error shapes that the Google GenAI library (or network
+      // libraries) might return. Example shapes:
+      //  - { status: 503 }
+      //  - { code: 503 }
+      //  - { error: { code: 503, status: 'UNAVAILABLE' } }
+      //  - { response: { status: 503 } }
+      //  - { name: 'AbortError' }
+      const statusNumberCandidates = [
+        err?.error?.code,
+        err?.status,
+        err?.statusCode,
+        err?.code,
+        err?.response?.status,
+        err?.response?.statusCode,
+      ];
+
+      let status: number | undefined;
+      for (const candidate of statusNumberCandidates) {
+        if (typeof candidate === "number") {
+          status = candidate;
+          break;
+        }
+        if (typeof candidate === "string" && /^\d+$/.test(candidate)) {
+          status = Number(candidate);
+          break;
+        }
+      }
+
+      // Also extract string statuses (gRPC-style) or high-level reasons.
+      const statusStringCandidates = [
+        err?.error?.status,
+        err?.reason,
+        err?.code,
+        err?.message,
+        err?.response?.statusText,
+      ];
+      const statusString =
+        statusStringCandidates.find((s) => typeof s === "string") ?? undefined;
+
+      const name = err?.name || (typeof err?.code === "string" ? err.code : "UnknownError");
       log({
         message: "getAiResponse error",
-        extra: { attempt, err: { name, status } },
+        extra: { attempt, err: { name, status, statusString, message: err?.message } },
       });
 
       // If final attempt or non-retryable status -> rethrow
+      // Retry on common HTTP retry status codes and some string reasons used by
+      // cloud APIs (e.g., 'UNAVAILABLE' when a model is overloaded).
       const retryableStatus = [429, 500, 502, 503, 504];
-      if (
-        attempt >= maxRetries ||
-        (status && !retryableStatus.includes(Number(status)))
-      ) {
+      const retryableStatusStrings = [
+        "UNAVAILABLE",
+        "RESOURCE_EXHAUSTED",
+        "RATE_LIMIT_EXCEEDED",
+        "TOO_MANY_REQUESTS",
+        "ABORTED",
+      ];
+      const shouldRetryNumber = typeof status === "number" && retryableStatus.includes(status);
+      const shouldRetryString =
+        typeof statusString === "string" && retryableStatusStrings.some((r) => statusString?.toUpperCase().includes(r));
+
+      if (attempt >= maxRetries || (!shouldRetryNumber && !shouldRetryString)) {
+        // Not retrying — rethrow the original error so callers can inspect it.
         throw err;
       }
 
@@ -54,7 +103,10 @@ export async function getAiResponse(
       const delay = Math.round(
         baseDelay * Math.pow(2, attempt) * (0.8 + Math.random() * 0.4)
       );
-      log({ message: "getAiResponse retrying", extra: { attempt, delay } });
+      log({
+        message: "getAiResponse retrying",
+        extra: { attempt, delay, status, statusString },
+      });
       await sleep(delay);
     }
   }

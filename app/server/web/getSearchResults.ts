@@ -78,7 +78,15 @@ function extractExternalUrl(
   }
 
   // Nothing better — return the original firstUrl as a final fallback.
-  return firstUrl || undefined;
+  const fallback = firstUrl || undefined;
+  if (typeof fallback === "string" && /duckduckgo\.com/i.test(fallback)) {
+    // Filter out DuckDuckGo internal URLs — we only want final external
+    // destination links (non-DuckDuckGo hosts). Returning undefined tells
+    // the parser that there is no usable external link.
+    return undefined;
+  }
+
+  return fallback;
 }
 
 export async function getSearchResults(
@@ -176,6 +184,7 @@ function parseSearchResultsHtml(
           .text() || ""
       ).trim();
       const url = extractExternalUrl(raw, $(el).html());
+      if (url && /duckduckgo\.com/i.test(url)) return; // filter
       items.push({
         title: title || trimmedQuery,
         url: url || undefined,
@@ -212,6 +221,7 @@ function parseSearchResultsHtml(
           .text() || ""
       ).trim();
       const extracted = extractExternalUrl(raw, parent.html());
+      if (!extracted || /duckduckgo\.com/i.test(extracted)) continue; // filter
 
       items.push({
         title,
